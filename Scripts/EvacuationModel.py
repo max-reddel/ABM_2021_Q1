@@ -1,12 +1,12 @@
 from mesa import Model
 from mesa.space import MultiGrid
 from mesa.time import RandomActivation
-from PathFinding import a_star
+from Scripts.PathFinding import a_star
 
 
 class EvacuationModel(Model):
 
-    def __init__(self, num_staff, num_visitors, female_ratio):
+    def __init__(self, num_staff, num_visitors, female_ratio=0.5):
         super().__init__()
         self.num_staff = num_staff
         self.num_visitors = num_visitors
@@ -21,7 +21,8 @@ class EvacuationModel(Model):
         self.all_paths = a_star(self)
 
     def step(self):
-        pass
+        print(f'Doing model step #{self.schedule.time}!')
+        self.schedule.step()
 
     def place_items_onto_grid(self):
         """

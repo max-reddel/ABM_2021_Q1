@@ -1,6 +1,6 @@
-from EvacuationModel import EvacuationModel
-from AnimateAgents import *
-from InanimateAgents import *
+# from EvacuationModel import EvacuationModel
+# from AnimateAgents import *
+# from InanimateAgents import *
 
 
 def a_star(model):
