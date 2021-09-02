@@ -29,6 +29,7 @@ def get_all_paths(grid):
 def a_star_search(grid, origin, destination):
     """
     This function returns the shortest path between pos1 and pos2 on a grid.
+    Inspiration from: https://www.redblobgames.com/pathfinding/a-star/implementation.html
 
     :param grid: MultiGrid
     :param origin: Tuple
