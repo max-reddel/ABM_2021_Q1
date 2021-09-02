@@ -12,6 +12,7 @@ class ToyModel(Model):
 
     def __init__(self, width, height):
 
+        super().__init__()
         self.grid = MultiGrid(width=width, height=height, torus=False)
         self.schedule = RandomActivation(self)
 

@@ -25,7 +25,6 @@ def create_toy_space():
     return model.grid
 
 
-
 def show_visualization():
     """
     Creates an animation.
@@ -56,8 +55,9 @@ def show_visualization():
             portrayal["Color"] = "blue"
             portrayal["r"] = 0.5
 
-        return portrayal
+        # More agents would be necessary to check for here
 
+        return portrayal
 
     # Parameters
     width = 20
@@ -72,7 +72,6 @@ def show_visualization():
                            {"width": width, "height": height})
     server.port = 8521  # The default
     server.launch()
-    server.model
 
 
 if __name__ == "__main__":
