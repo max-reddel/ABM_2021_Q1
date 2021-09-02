@@ -1,4 +1,17 @@
 from mesa import Agent
+import random
+from enum import Enum
+
+
+class Gender(Enum):
+    MALE = 1
+    FEMALE = 2
+
+
+class Movement(Enum):
+    RUNNING = 1
+    WALKING = 2
+    STANDING = 3
 
 
 class Person(Agent):
@@ -6,15 +19,99 @@ class Person(Agent):
     def __init__(self, unique_id, model, gender):
         super().__init__(unique_id, model)
         self.gender = gender
-        # and more to follow
+        self.age = random.randint(13, 100)  # only for potential extension
+        self.default_walking_speed = self.get_default_speed(Movement.WALKING)
+        self.default_running_speed = self.get_default_speed(Movement.RUNNING)
+        self.entered_via = self.sample_entrance()  # from which entrance/exit they entered the building
+        self.had_safety_training = False
+        self.knows_exits = False  # knows all exits?
+        self.exit_time = None
+        self.exit_location = None
+        self.heard_alarm = False  # self.model.alarm_rang()  # Later: implement this in model class.
+        # Currently: alarm goes off --> all agents hear it. Thus, boolean depends on whether it rang already or not.
+        self.tasks = []  # list of planned tasks (destination & end-time). First task is current task. # Later: fill it.
+        self.path_to_current_dest = []  # Later: get this from pathfinding-dict (also using self.tasks)
+
+    def step(self):
+        pass
+
+    def get_default_speed(self, movement):
+        """
+        Returns the default speed of a person. I.e., the speed before any adjustments due to crowds or slopes.
+        :param movement:    Element of Movement-Enum
+        :return:            float, default speed of the person
+        """
+        # Specifying speeds
+        male_dict = {Movement.RUNNING: 1.5,
+                     Movement.WALKING: 1.0}
+        female_dict = {Movement.RUNNING: 1.4,
+                       Movement.WALKING: 0.9}
+
+        # Read movement-speed from the right dictionary & return it.
+        speed = 0.0  # Heads-up: If gender would be sth else than MALE/FEMALE, speed would always be 0.
+        if self.gender == Gender.MALE:
+            speed = male_dict[movement]
+        elif self.gender == Gender.FEMALE:
+            speed = female_dict[movement]
+        return speed
+
+
+    def sample_entrance(self):
+        """
+        Samples an entrance for a person.
+        :return:        Enum of possible Entrances/Exits
+        """
+        entrance = "main entrance"  # Later: create Entrance Enum, actually sample from it
+        return entrance
+
+    def sample_safety_training(self, probability=0.1):
+        """
+        Samples whether a person had safety training. They had it with a probability of 'probability'.
+        :param probability:     float, between 0.0 and 1.0
+        :return:                boolean, whether the person had safety training
+        """
+        if random.random() <= probability:
+            self.had_safety_training = True
+
+    def get_knows_exits(self, probability=0.1):
+        """
+        Samples whether a person knows the exits. They know it with a probability of 'probability'.
+
+        :param probability:     float, between 0.0 and 1.0
+        :return:                boolean, whether the person knows the exits
+        """
+        knows_exits = False  # default
+        # everyone who had safety training, knows all exits
+        if self.had_safety_training:
+            knows_exits = True
+        # people without safety training know the exits with a probability of 0.1 ('probability')
+        else:
+            if random.random() <= probability:
+                knows_exits = True
+        return knows_exits
+
+
+class Visitor(Person):
+
+    def __init__(self, unique_id, model, gender):
+        super().__init__(unique_id, model, gender)
+        self.sample_safety_training(probability=0.1)  # Few visitors had safety training
+        self.knows_exits = self.get_knows_exits(probability=0.1)  # knows all exits?
+        self.tasks = []  # list of planned tasks (destination & end-time). First task is current task.
+        # Later: add/sample this list. Could also have only current_task instead
+        # & sample new task when current_task is done.
 
     def step(self):
         pass
 
 
-class Visitor(Person):
-    pass
-
-
 class Staff(Person):
-    pass
+    def __init__(self, unique_id, model, gender):
+        super().__init__(unique_id, model, gender)
+        self.had_safety_training = True  # All staff had safety training
+        self.knows_exits = True
+        self.tasks = []  # list of planned tasks (destination & end-time). First task is current task.
+        # Later: add/sample this list
+
+    def step(self):
+        pass
