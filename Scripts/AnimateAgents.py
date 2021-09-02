@@ -18,6 +18,7 @@ class Person(Agent):
 
     def __init__(self, unique_id, model, gender):
         super().__init__(unique_id, model)
+        # Constant attributes # TODO: Transform into Constants?
         self.gender = gender
         self.age = random.randint(13, 100)  # only for potential extension
         self.default_walking_speed = self.get_default_speed(Movement.WALKING)
@@ -25,15 +26,19 @@ class Person(Agent):
         self.entered_via = self.sample_entrance()  # from which entrance/exit they entered the building
         self.had_safety_training = False
         self.knows_exits = False  # knows all exits?
+
+        # Adjustable attributes
         self.exit_time = None
         self.exit_location = None
         self.heard_alarm = False  # self.model.alarm_rang()  # Later: implement this in model class.
         # Currently: alarm goes off --> all agents hear it. Thus, boolean depends on whether it rang already or not.
         self.tasks = []  # list of planned tasks (destination & end-time). First task is current task. # Later: fill it.
-        self.path_to_current_dest = []  # Later: get this from pathfinding-dict (also using self.tasks)
+        self.path_to_current_dest = []  # First element is current position.
+        # Later: get this from pathfinding-dict (also using self.tasks)
 
     def step(self):
-        pass
+        print("in agent-step")
+        self.walk()
 
     def get_default_speed(self, movement):
         """
@@ -42,8 +47,8 @@ class Person(Agent):
         :return:            float, default speed of the person
         """
         # Specifying speeds
-        male_dict = {Movement.RUNNING: 1.5,
-                     Movement.WALKING: 1.0}
+        male_dict = {Movement.RUNNING: 0.1,  # orig: 1.5
+                     Movement.WALKING: 0.1}  # orig; 1.0
         female_dict = {Movement.RUNNING: 1.4,
                        Movement.WALKING: 0.9}
 
@@ -90,6 +95,48 @@ class Person(Agent):
                 knows_exits = True
         return knows_exits
 
+    def walk(self):
+        """
+        Makes the agent walk. By moving it from its current position, into the direction of their current destination,
+        with its speed being adjusted to whether it is an emergency (i.e., adjusted the Movement mode)
+        and the amount of people nearby.
+
+        Disclaimer: Currently still basic version. Only walking into right direction.
+
+        :return:    nothing?
+        """
+
+        # while len(self.path_to_current_dest) >1:
+        # Calculate how many cells you can travel
+        stride_length = int(self.default_walking_speed * 10)
+
+        try:
+            # Find cell you should move to
+            new_pos = self.path_to_current_dest[stride_length]
+            # Adjust remaining path
+            self.path_to_current_dest = self.path_to_current_dest[stride_length:]
+        except:
+            # Find cell you should move to (if stride is overreaching destination)
+            new_pos = self.path_to_current_dest[-1]
+            # Adjust remaining path
+            self.path_to_current_dest = self.path_to_current_dest[-1]
+
+
+
+        # Adjust agent-placement on grid
+        self.model.grid.move_agent(agent=self, pos=new_pos)
+
+        print(f"walked to {new_pos}")
+
+
+
+
+
+    # def adjust_speed(self):
+
+
+
+
 
 class Visitor(Person):
 
@@ -101,8 +148,8 @@ class Visitor(Person):
         # Later: add/sample this list. Could also have only current_task instead
         # & sample new task when current_task is done.
 
-    def step(self):
-        pass
+    # def step(self):
+    #     pass
 
 
 class Staff(Person):

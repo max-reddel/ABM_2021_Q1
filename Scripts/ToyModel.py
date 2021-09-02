@@ -1,8 +1,9 @@
 from mesa import Model
 from mesa.time import RandomActivation
 from mesa.space import MultiGrid
-from AnimateAgents import *
-from InanimateAgents import *
+from Scripts.AnimateAgents import *
+from Scripts.InanimateAgents import *
+# from Scripts.PathFinding import a_star_search
 
 
 class ToyModel(Model):
@@ -10,7 +11,7 @@ class ToyModel(Model):
     This is just a toy model to set up the grid and visualize it.
     """
 
-    def __init__(self, width, height):
+    def __init__(self, width=20, height=15):
 
         super().__init__()
         self.grid = MultiGrid(width=width, height=height, torus=False)
@@ -57,12 +58,12 @@ class ToyModel(Model):
 
         """Place inner walls"""
 
-        # horizonal walls
+        # horizontal walls
         for i in range(self.grid.width):
-            if i < 8:
+            if i < 9:
                 self.grid.place_agent(agent=Wall(0, self), pos=(i, 10))
 
-            if i > 8:
+            if i > 7:
                 self.grid.place_agent(agent=Wall(0, self), pos=(i, 3))
 
         # vertical walls
@@ -73,4 +74,13 @@ class ToyModel(Model):
                 self.grid.place_agent(agent=Wall(0, self), pos=(11, i))
 
         """Place a visitor"""
-        self.grid.place_agent(agent=Visitor(0, self, gender='female'), pos=(1, self.grid.height-2))
+        visitor = Visitor(0, self, gender=Gender.MALE)
+
+        # start = (1, 13)  # upper left corner
+        # end = (5, 11)  # 4 cells further to the right
+        # path = a_star_search(self.grid, start, end)
+        path = [(1, 12), (1, 11), (2, 11), (3, 11), (4, 11), (5, 11), (6, 11), (7, 11), (8, 11), (9, 11), (9, 10), (9, 9), (8, 9), (7, 9), (7, 8), (7, 7), (7, 6), (7, 5), (7, 4), (7, 3), (7, 2), (7, 1), (8, 1), (9, 1), (10, 1), (11, 1), (12, 1), (13, 1), (14, 1), (15, 1), (16, 1), (16, 0)]
+        visitor.path_to_current_dest = path
+
+        self.grid.place_agent(agent=visitor, pos=(1, self.grid.height-2))
+        self.schedule.add(visitor)

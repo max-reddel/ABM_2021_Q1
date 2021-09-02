@@ -169,11 +169,12 @@ def create_toy_space(visalize=False):
     """
     This function creates a multi-grid space and fills it with some inanimate agents.
     """
-    model = ToyModel(width=20, height=15)
+
     if visalize:
         show_visualization(ToyModel)
-
-    return model.grid
+    else:
+        model = ToyModel(width=20, height=15)
+        return model.grid
 
 
 def show_visualization(model):
