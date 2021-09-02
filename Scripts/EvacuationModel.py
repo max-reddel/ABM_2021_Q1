@@ -18,7 +18,7 @@ class EvacuationModel(Model):
         self.place_items_onto_grid()  # see description below
         self.place_persons_onto_grid()  # see description below
 
-        self.all_paths = a_star(self)
+        self.all_paths = a_star(self.grid)
 
     def step(self):
         print(f'Doing model step #{self.schedule.time}!')
