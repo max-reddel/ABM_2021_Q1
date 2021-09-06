@@ -2,7 +2,7 @@ from Scripts.ToyModel import *
 from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
 from queue import PriorityQueue
-
+# from Scripts.Visualization import *
 
 def get_all_paths(grid):
     """
@@ -165,12 +165,12 @@ def init_destinations(grid):
     return destinations_list
 
 
-def create_toy_space(visalize=False):
+def create_toy_space(visualize=False):
     """
     This function creates a multi-grid space and fills it with some inanimate agents.
     """
 
-    if visalize:
+    if visualize:
         show_visualization(ToyModel)
     else:
         model = ToyModel(width=20, height=15)
@@ -228,7 +228,7 @@ def show_visualization(model):
 
 
 # if __name__ == "__main__":
-    # toy_grid = create_toy_space(visalize=False).grid
+    # toy_grid = create_toy_space(visualize=False).grid
     # start = (1, 13)  # upper left corner
     # end = (16, 0)  # 4 cells further to the right
     # final_path = a_star_search(toy_grid, start, end)

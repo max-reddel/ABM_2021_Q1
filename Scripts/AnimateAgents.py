@@ -1,6 +1,7 @@
 from mesa import Agent
 import random
 from enum import Enum
+# from PathFinding import a_star_search
 
 
 class Gender(Enum):
@@ -18,25 +19,41 @@ class Person(Agent):
 
     def __init__(self, unique_id, model, gender):
         super().__init__(unique_id, model)
+
         # Constant attributes # TODO: Transform into Constants?
         self.gender = gender
         self.age = random.randint(13, 100)  # only for potential extension
+
+        # Walking related (TODO: create object)
         self.default_walking_speed = self.get_default_speed(Movement.WALKING)
         self.default_running_speed = self.get_default_speed(Movement.RUNNING)
         self.entered_via = self.sample_entrance()  # from which entrance/exit they entered the building
+
+        # This is just an example path
+        # start = (1, 12)  # upper left corner
+        # end = (16, 0)  # 4 cells further to the right
+        # path = a_star_search(self.model.grid, start, end)
+
+        self.path_to_current_dest = []  # First element is current position.
+        # Later: get this from pathfinding-dict (also using self.tasks)
+
+        # Evacuation related (TODO: create object)
         self.had_safety_training = False
         self.knows_exits = False  # knows all exits?
-
-        # Adjustable attributes
         self.exit_time = None
         self.exit_location = None
         self.heard_alarm = False  # self.model.alarm_rang()  # Later: implement this in model class.
         # Currently: alarm goes off --> all agents hear it. Thus, boolean depends on whether it rang already or not.
-        self.tasks = []  # list of planned tasks (destination & end-time). First task is current task. # Later: fill it.
-        self.path_to_current_dest = []  # First element is current position.
-        # Later: get this from pathfinding-dict (also using self.tasks)
+
+        self.current_task = []  # CompositeTask object
+
 
     def step(self):
+
+        # if task done:             # check this in self.current_task attributes
+        #   sample_new_task()
+        # continue task
+
         self.walk()
 
     def get_default_speed(self, movement):
@@ -149,6 +166,8 @@ class Visitor(Person):
         # & sample new task when current_task is done.
 
     # def step(self):
+    #     task = self.current_task.get_current_sub_task(agent)
+    #     do_task(task)
     #     pass
 
 
@@ -161,5 +180,5 @@ class Staff(Person):
         self.tasks = []  # list of planned tasks (destination & end-time). First task is current task.
         # Later: add/sample this list
 
-    def step(self):
-        pass
+    # def step(self):
+    #     pass

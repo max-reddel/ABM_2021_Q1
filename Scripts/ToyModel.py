@@ -1,9 +1,9 @@
 from mesa import Model
 from mesa.time import RandomActivation
 from mesa.space import MultiGrid
+
 from Scripts.AnimateAgents import *
 from Scripts.InanimateAgents import *
-# from Scripts.PathFinding import a_star_search
 
 
 class ToyModel(Model):
@@ -22,7 +22,7 @@ class ToyModel(Model):
         # Create and add agents to the grid and schedule
 
     def step(self):
-        print(f'Doing model step #{self.schedule.time}!')
+        # print(f'Doing model step #{self.schedule.time+1}!')
         self.schedule.step()
 
     def fill_grid(self):
@@ -78,8 +78,8 @@ class ToyModel(Model):
         """Place a visitor"""
         visitor = Visitor(0, self, gender=Gender.MALE)
 
-        # start = (1, 13)  # upper left corner
-        # end = (5, 11)  # 4 cells further to the right
+        # start = (1, 12)  # upper left corner
+        # end = (16, 0)  # 4 cells further to the right
         # path = a_star_search(self.grid, start, end)
         path = [(1, 12), (1, 11), (2, 11), (3, 11), (4, 11), (5, 11), (6, 11), (7, 11), (8, 11), (9, 11), (9, 10), (9, 9), (8, 9), (7, 9), (7, 8), (7, 7), (7, 6), (7, 5), (7, 4), (7, 3), (7, 2), (7, 1), (8, 1), (9, 1), (10, 1), (11, 1), (12, 1), (13, 1), (14, 1), (15, 1), (16, 1), (16, 0)]
         visitor.path_to_current_dest = path
