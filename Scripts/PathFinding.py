@@ -174,7 +174,7 @@ def create_toy_space(visalize=False):
         show_visualization(ToyModel)
     else:
         model = ToyModel(width=20, height=15)
-        return model.grid
+        return model
 
 
 def show_visualization(model):
@@ -222,16 +222,17 @@ def show_visualization(model):
                            [canvas],
                            "Evacuation Model",
                            {"width": width, "height": height})
+
     server.port = 8521  # The default
     server.launch()
 
 
-if __name__ == "__main__":
-    toy_grid = create_toy_space(visalize=False)
+# if __name__ == "__main__":
+    # toy_grid = create_toy_space(visalize=False).grid
     # start = (1, 13)  # upper left corner
-    # end = (5, 11)  # 4 cells further to the right
+    # end = (16, 0)  # 4 cells further to the right
     # final_path = a_star_search(toy_grid, start, end)
     # print(final_path)
 
-    paths = get_all_paths(toy_grid)
-    print(f'Number of paths: {len(paths)}')
+    # paths = get_all_paths(toy_grid)
+    # print(f'Number of paths: {len(paths)}')

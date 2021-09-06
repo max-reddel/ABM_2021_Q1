@@ -19,6 +19,8 @@ class ToyModel(Model):
 
         self.fill_grid()
 
+        # Create and add agents to the grid and schedule
+
     def step(self):
         print(f'Doing model step #{self.schedule.time}!')
         self.schedule.step()

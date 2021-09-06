@@ -37,7 +37,6 @@ class Person(Agent):
         # Later: get this from pathfinding-dict (also using self.tasks)
 
     def step(self):
-        print("in agent-step")
         self.walk()
 
     def get_default_speed(self, movement):
@@ -59,7 +58,6 @@ class Person(Agent):
         elif self.gender == Gender.FEMALE:
             speed = female_dict[movement]
         return speed
-
 
     def sample_entrance(self):
         """
@@ -106,6 +104,7 @@ class Person(Agent):
         :return:    nothing?
         """
 
+
         # while len(self.path_to_current_dest) >1:
         # Calculate how many cells you can travel
         stride_length = int(self.default_walking_speed * 10)
@@ -119,14 +118,15 @@ class Person(Agent):
             # Find cell you should move to (if stride is overreaching destination)
             new_pos = self.path_to_current_dest[-1]
             # Adjust remaining path
-            self.path_to_current_dest = self.path_to_current_dest[-1]
-
+            self.path_to_current_dest = [self.path_to_current_dest[-1]]
 
 
         # Adjust agent-placement on grid
+        # print(f'self.path_to_current_dest = {self.path_to_current_dest}')
+        # print(f'Agent wants to walk to {new_pos}')
         self.model.grid.move_agent(agent=self, pos=new_pos)
 
-        print(f"walked to {new_pos}")
+        # print(f"Agent walked to position: {new_pos}")
 
 
 
@@ -153,6 +153,7 @@ class Visitor(Person):
 
 
 class Staff(Person):
+
     def __init__(self, unique_id, model, gender):
         super().__init__(unique_id, model, gender)
         self.had_safety_training = True  # All staff had safety training
