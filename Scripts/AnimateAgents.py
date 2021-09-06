@@ -1,7 +1,7 @@
 from mesa import Agent
 import random
 from enum import Enum
-# from PathFinding import a_star_search
+from PathFinding import a_star_search
 
 
 class Gender(Enum):
@@ -30,11 +30,11 @@ class Person(Agent):
         self.entered_via = self.sample_entrance()  # from which entrance/exit they entered the building
 
         # This is just an example path
-        # start = (1, 12)  # upper left corner
-        # end = (16, 0)  # 4 cells further to the right
-        # path = a_star_search(self.model.grid, start, end)
+        start = (1, 12)  # upper left corner
+        end = (16, 0)  # 4 cells further to the right
+        path = a_star_search(self.model.grid, start, end)
 
-        self.path_to_current_dest = []  # First element is current position.
+        self.path_to_current_dest = path  # First element is current position.
         # Later: get this from pathfinding-dict (also using self.tasks)
 
         # Evacuation related (TODO: create object)
