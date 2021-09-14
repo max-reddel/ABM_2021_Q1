@@ -30,10 +30,10 @@ class Person(Agent):
         self.entered_via = self.sample_entrance()  # from which entrance/exit they entered the building
 
         # This is just an example path
-        start = (1, 12)  # upper left corner
+        start = (1, 13)  # upper left corner
         end = (16, 0)  # 4 cells further to the right
         path = a_star_search(self.model.grid, start, end)
-
+        # print(path)
         self.path_to_current_dest = path  # First element is current position.
         # Later: get this from pathfinding-dict (also using self.tasks)
 
@@ -46,7 +46,6 @@ class Person(Agent):
         # Currently: alarm goes off --> all agents hear it. Thus, boolean depends on whether it rang already or not.
 
         self.current_task = []  # CompositeTask object
-
 
     def step(self):
 
@@ -121,7 +120,6 @@ class Person(Agent):
         :return:    nothing?
         """
 
-
         # while len(self.path_to_current_dest) >1:
         # Calculate how many cells you can travel
         stride_length = int(self.default_walking_speed * 10)
@@ -137,7 +135,6 @@ class Person(Agent):
             # Adjust remaining path
             self.path_to_current_dest = [self.path_to_current_dest[-1]]
 
-
         # Adjust agent-placement on grid
         # print(f'self.path_to_current_dest = {self.path_to_current_dest}')
         # print(f'Agent wants to walk to {new_pos}')
@@ -145,14 +142,7 @@ class Person(Agent):
 
         # print(f"Agent walked to position: {new_pos}")
 
-
-
-
-
     # def adjust_speed(self):
-
-
-
 
 
 class Visitor(Person):

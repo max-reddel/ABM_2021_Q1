@@ -25,17 +25,22 @@ def get_all_paths(grid):
     return all_paths
 
 
-def a_star_search(grid, origin, destination):
+def a_star_search(grid, origin, destination,
+                  unwalkable_objects_list=None):
     """
     This function returns the shortest path between pos1 and pos2 on a grid.
     Inspiration from: https://www.redblobgames.com/pathfinding/a-star/implementation.html
 
+    :param unwalkable_objects_list: list with all object types that are unwalkable
     :param grid: MultiGrid
     :param origin: Tuple
     :param destination: Tuple
 
     :return: path : list
     """
+
+    if unwalkable_objects_list is None:
+        unwalkable_objects_list = [Wall, Obstacle, Desk, HelpDesk, Shelf, OutOfBounds]
 
     frontier = PriorityQueue()
     frontier.put(origin, 0)
@@ -50,7 +55,7 @@ def a_star_search(grid, origin, destination):
         if current == destination:
             break
 
-        for next_pos in get_valid_neighbors(grid, current):
+        for next_pos in get_valid_neighbors(grid, current, unwalkable_objects_list):
             new_cost = cost_so_far[current] + 1
             if next_pos not in cost_so_far or new_cost < cost_so_far[next_pos]:
                 cost_so_far[next_pos] = new_cost
@@ -61,7 +66,7 @@ def a_star_search(grid, origin, destination):
     # Convert path from a linked list to proper list
     pos = destination
     path_list = []
-
+    # print(f'linked path list:\n{path}')
     try:
         while pos is not origin:
             path_list.append(pos)
@@ -69,17 +74,20 @@ def a_star_search(grid, origin, destination):
     except:
         pass
 
+    path_list.append(origin)
     path_list.reverse()
+    # print(f'proper path:\n{path_list}')
     return path_list
 
 
-def get_valid_neighbors(grid, pos):
+def get_valid_neighbors(grid, pos, unwalkable_objects_list):
     """
     This function returns the adjacent cells of some position on the grid, excluding all cells that contain walls and
     obstacles.
 
     :param grid: MultiGrid
     :param pos: Tuple
+    :param unwalkable_objects_list: list with the classes that are considered unwalkable.
     :return: list with positions (tuples)
     """
     valid_neighbors = set()
@@ -94,7 +102,10 @@ def get_valid_neighbors(grid, pos):
             valid_neighbors.add(neighbor_pos)
         else:
             n = n_list[0]  # if there are agents on this list
-            if not isinstance(n, Wall) and not isinstance(n, Obstacle):
+            # if not isinstance(n, Wall) and not isinstance(n, Obstacle):
+
+            # if n is not of object type as specificed in unwalkable_objects_list, n is a valid neighbor
+            if not any(map(lambda t: isinstance(n, t), unwalkable_objects_list)):
                 valid_neighbors.add(neighbor_pos)
 
     valid_neighbors = list(valid_neighbors)

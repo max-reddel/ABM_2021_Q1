@@ -18,13 +18,13 @@ def show_visualization(model):
         portrayal = {"Filled": "true",
                      "Layer": 0}
 
-        if isinstance(agent, Wall):
+        if isinstance(agent, Wall) or isinstance(agent, Obstacle):
             portrayal["Shape"] = "rect"
             portrayal["Color"] = "gray"
             portrayal["h"] = 1
             portrayal["w"] = 1
 
-        if isinstance(agent, Exit):
+        if isinstance(agent, ExitA) or isinstance(agent, ExitB) or isinstance(agent, ExitC):
             portrayal["Shape"] = "rect"
             portrayal["Color"] = "red"
             portrayal["h"] = 1
@@ -34,8 +34,15 @@ def show_visualization(model):
             portrayal["Shape"] = "circle"
             portrayal["Color"] = "blue"
             portrayal["r"] = 0.5
+            portrayal["Layer"]: 1
 
-        # More agents would be necessary to check for here
+        if isinstance(agent, Staff):
+            portrayal["Shape"] = "circle"
+            portrayal["Color"] = "green"
+            portrayal["r"] = 0.5
+            portrayal["Layer"]: 1
+
+        # TODO: More checks for agents would be necessary here
 
         return portrayal
 
