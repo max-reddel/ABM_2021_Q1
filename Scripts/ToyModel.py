@@ -1,3 +1,5 @@
+import random
+
 from mesa import Model
 from mesa.time import RandomActivation
 from mesa.space import MultiGrid
@@ -12,7 +14,7 @@ class ToyModel(Model):
     This is just a toy model to set up the grid and visualize it.
     """
 
-    def __init__(self, width=20, height=15):
+    def __init__(self, width=20, height=15, n_visitors=10):
 
         super().__init__()
         self.grid = MultiGrid(width=width, height=height, torus=False)
@@ -24,17 +26,14 @@ class ToyModel(Model):
 
         # Create and add agents to the grid and schedule
         self.fill_grid()
-        print(self.destinations[Destination.DESK])
+        self.not_spawnable_objects = [Wall, Obstacle, Desk, OutOfBounds, Exit, HelpDesk, Shelf, DeskInteractive,
+                                      HelpDeskInteractiveForHelpee, HelpDeskInteractiveForHelper, ShelfInteractive]
+        self.spawn_visitors(n=n_visitors)
+
 
     def step(self):
 
-        # pos = self.schedule.agents[0].pos
-        # print(f'old position: {pos}')
-
         self.schedule.step()
-
-        # pos = self.schedule.agents[0].pos
-        # print(f'new position: {pos}')
 
     def fill_grid(self):
 
@@ -115,24 +114,74 @@ class ToyModel(Model):
         self.destinations[Destination.DESK].append(pos)
 
         pos = (4, 3)
-        self.grid.place_agent(agent=DeskInteractive(0, self), pos=pos)
+        self.grid.place_agent(agent=DeskInteractive(1, self), pos=pos)
         self.destinations[Destination.DESK].append(pos)
+
+        pos = (9, 1)
+        self.grid.place_agent(agent=DeskInteractive(2, self), pos=pos)
+        self.destinations[Destination.DESK].append(pos)
+
+        pos = (18, 2)
+        self.grid.place_agent(agent=DeskInteractive(3, self), pos=pos)
+        self.destinations[Destination.DESK].append(pos)
+
+        pos = (18, 4)
+        self.grid.place_agent(agent=DeskInteractive(4, self), pos=pos)
+        self.destinations[Destination.DESK].append(pos)
+
+        pos = (1, 13)
+        self.grid.place_agent(agent=DeskInteractive(4, self), pos=pos)
+        self.destinations[Destination.DESK].append(pos)
+
 
         """Place a visitor"""
 
         # Create first composite task
 
-        # 1st visitor
-        pos = (1, self.grid.height-2)
-        visitor1 = Visitor(0, self, gender=Gender.MALE)
-        self.grid.place_agent(agent=visitor1, pos=pos)
-        self.schedule.add(visitor1)
+        # # 1st visitor
+        # pos = (1, self.grid.height-2)
+        # visitor1 = Visitor(0, self, gender=Gender.MALE)
+        # self.grid.place_agent(agent=visitor1, pos=pos)
+        # self.schedule.add(visitor1)
+        #
+        # # 2nd visitor
+        # start = (18, 12)  # lower left corner
+        # visitor2 = Visitor(1, self, gender=Gender.FEMALE)
+        # end = (4, 3)  # chair
+        # path = a_star_search(self.grid, start, end)
+        # visitor2.path_to_current_dest = path
+        # self.grid.place_agent(agent=visitor2, pos=start)
+        # self.schedule.add(visitor2)
 
-        # 2nd visitor
-        start = (18, 12)  # lower left corner
-        visitor2 = Visitor(1, self, gender=Gender.FEMALE)
-        end = (4, 3)  # chair
-        path = a_star_search(self.grid, start, end)
-        visitor2.path_to_current_dest = path
-        self.grid.place_agent(agent=visitor2, pos=start)
-        self.schedule.add(visitor2)
+    def get_all_spawnable_cells(self):
+        """
+        This function finds all cells that are valid spawning points for visitors.
+        """
+        spawnable_positions = []
+
+        for i in range(self.grid.width):
+            for j in range(self.grid.height):
+                n_list = self.grid.get_cell_list_contents([(i, j)])
+
+                if len(n_list) <= 0:
+                    spawnable_positions.append((i, j))
+                elif len(n_list) > 0:
+                    n = n_list[0]
+                    if not any(map(lambda t: isinstance(n, t), self.not_spawnable_objects)):
+                        spawnable_positions.append((i, j))
+
+        return spawnable_positions
+
+    def spawn_visitors(self, n):
+        """
+        This function spawns n visitors randomly on the grid avoiding cells with objects that off limit for visitors.
+        :param n: int: number of visitors to spawn
+        """
+        spawnable_positions = self.get_all_spawnable_cells()
+        for i in range(n):
+            visitor = Visitor(i, self)
+
+            pos = random.choice(spawnable_positions)
+
+            self.grid.place_agent(agent=visitor, pos=pos)
+            self.schedule.add(visitor)

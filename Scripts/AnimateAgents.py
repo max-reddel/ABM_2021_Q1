@@ -17,11 +17,9 @@ class Movement(Enum):
 
 class Person(Agent):
 
-    def __init__(self, unique_id, model, gender):
+    def __init__(self, unique_id, model, gender=Gender.FEMALE):
         super().__init__(unique_id, model)
 
-        # Constant attributes # TODO: Transform into Constants?
-        # self.pos = pos
         self.gender = gender
         self.age = random.randint(13, 100)  # only for potential extension
         self.busy = False  # interacting with another object (Desk, Shelf, etc.)
@@ -135,7 +133,7 @@ class Person(Agent):
         # Adjust agent-placement on grid
         self.model.grid.move_agent(agent=self, pos=new_pos)
 
-        print(f"Agent walked to position: {new_pos}")
+        # print(f"Agent walked to position: {new_pos}")
 
     def stay(self):
         """
@@ -146,7 +144,7 @@ class Person(Agent):
 
 class Visitor(Person):
 
-    def __init__(self, unique_id, model, gender):
+    def __init__(self, unique_id, model, gender=Gender.FEMALE):
         super().__init__(unique_id, model, gender)
         self.sample_safety_training(probability=0.1)  # Few visitors had safety training
         self.knows_exits = self.get_knows_exits(probability=0.1)  # knows all exits?
@@ -162,7 +160,7 @@ class Visitor(Person):
 
 class Staff(Person):
 
-    def __init__(self, unique_id, model, gender):
+    def __init__(self, unique_id, model, gender=Gender.FEMALE):
         super().__init__(unique_id, model, gender)
         self.had_safety_training = True  # All staff had safety training
         self.knows_exits = True
@@ -181,17 +179,11 @@ class Staff(Person):
 
 class CompositeTask:
 
-    def __init__(self, person, model, task_name=None):
+    def __init__(self, person, model):
         """
         :param person: Person: person that holds this composite task
         :param task_name:
         """
-
-        if task_name is None:
-            # atm STUDY, should become randomly sampled
-            task_name = VisitorTasks.STUDY
-        else:
-            self.task_name = task_name
 
         self.person = person
         self.model = model
@@ -345,13 +337,12 @@ class Stay(BasicTask):
         self.remaining_duration -= 1
 
 
-class VisitorTasks(Enum):
-    # TODO: Continue here: Where do I get the destinations from without circular dependencies?
-    STUDY = 1
-    GET_HELP = 2
-    GET_BOOK = 3
-
-
-class StaffTasks(Enum):
-    PROVIDE_HELP = 1
-    WORK_IN_OFFICE = 2
+# class VisitorTasks(Enum):
+#     STUDY = 1
+#     GET_HELP = 2
+#     GET_BOOK = 3
+#
+#
+# class StaffTasks(Enum):
+#     PROVIDE_HELP = 1
+#     WORK_IN_OFFICE = 2
