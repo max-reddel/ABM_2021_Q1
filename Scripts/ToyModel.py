@@ -151,6 +151,25 @@ class ToyModel(Model):
         self.grid.place_agent(agent=HelpDeskInteractiveForHelpee(0, self), pos=pos)
         self.destinations[Destination.HELPDESK].append(pos)
 
+        # # Place some staff members
+        # # One that is in the office
+        # pos = (10, 13)
+        # staff1 = Staff(99, self)
+        # self.grid.place_agent(agent=staff1, pos=pos)
+        # self.schedule.add(staff1)
+        #
+        # # One that is at the help desk
+        # pos = (3, 13)
+        # staff2 = Staff(100, self)
+        # self.grid.place_agent(agent=staff1, pos=pos)
+        # self.schedule.add(staff2)
+        #
+        # # One that is at the help desk
+        # pos = (8, 8)
+        # staff3 = Staff(101, self)
+        # self.grid.place_agent(agent=staff3, pos=pos)
+        # self.schedule.add(staff3)
+
     def get_all_spawnable_cells(self):
         """
         This function finds all cells that are valid spawning points for visitors.

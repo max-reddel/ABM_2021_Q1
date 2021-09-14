@@ -60,10 +60,7 @@ def show_visualization(model):
 
         if isinstance(agent, Visitor):
             portrayal["Shape"] = "circle"
-            if not agent.busy:
-                portrayal["Color"] = "blue"  # Those colors are just for now
-            else:
-                portrayal["Color"] = "green"
+            portrayal["Color"] = "blue"
             portrayal["r"] = 0.5
             portrayal["Layer"]: 1
             portrayal["Name"] = 'visitor'
@@ -71,7 +68,7 @@ def show_visualization(model):
         if isinstance(agent, Staff):
             portrayal["Shape"] = "circle"
             portrayal["Color"] = "green"
-            portrayal["r"] = 0.5
+            portrayal["r"] = 0.8
             portrayal["Layer"]: 1
             portrayal["Name"] = 'staff'
 

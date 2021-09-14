@@ -24,7 +24,7 @@ class Person(Agent):
         self.age = random.randint(13, 100)  # only for potential extension
         self.busy = False  # interacting with another object (Desk, Shelf, etc.)
 
-        # Walking related (TODO: create object)
+        # Walking related (TODO: Maybe create object)
         self.default_walking_speed = self.get_default_speed(Movement.WALKING)
         self.default_running_speed = self.get_default_speed(Movement.RUNNING)
         self.entered_via = self.sample_entrance()  # from which entrance/exit they entered the building
@@ -32,7 +32,7 @@ class Person(Agent):
         self.path_to_current_dest = []  # First element is current position.
         # Later: get this from pathfinding-dict (also using self.tasks)
 
-        # Evacuation related (TODO: create object)
+        # Evacuation related (TODO: Maybe create object)
         self.had_safety_training = False
         self.knows_exits = False  # knows all exits?
         self.exit_time = None
@@ -148,14 +148,6 @@ class Visitor(Person):
         super().__init__(unique_id, model, gender)
         self.sample_safety_training(probability=0.1)  # Few visitors had safety training
         self.knows_exits = self.get_knows_exits(probability=0.1)  # knows all exits?
-        self.tasks = []  # list of planned tasks (destination & end-time). First task is current task.
-        # Later: add/sample this list. Could also have only current_task instead
-        # & sample new task when current_task is done.
-
-    # def step(self):
-    #     task = self.current_task.get_current_sub_task(agent)
-    #     do_task(task)
-    #     pass
 
 
 class Staff(Person):
@@ -164,12 +156,6 @@ class Staff(Person):
         super().__init__(unique_id, model, gender)
         self.had_safety_training = True  # All staff had safety training
         self.knows_exits = True
-        self.tasks = []  # list of planned tasks (destination & end-time). First task is current task.
-        # Later: add/sample this list
-
-    # def step(self):
-    #     pass
-
 
 ###################################################################################################################
 ###################################################################################################################
@@ -195,15 +181,14 @@ class CompositeTask:
         remaining_subtasks = []
 
         # Sample a random task
-        self.all_possible_tasks = [VisitorTasks.STUDY,
-                              VisitorTasks.GET_BOOK,
-                              VisitorTasks.GET_HELP]  # TODO: To be extended
-        weights = self.get_weights()
+        all_possible_visitor_tasks = [VisitorTasks.STUDY, VisitorTasks.GET_BOOK, VisitorTasks.GET_HELP]
+        all_possible_staff_tasks = [StaffTasks.PROVIDE_HELP, StaffTasks.WORK_IN_OFFICE]
 
-        random_task = random.choices(self.all_possible_tasks, weights)[0]
-
-        # Prepare composite task
+        # Prepare composite task for the visitor
         if isinstance(self.person, Visitor):
+
+            weights = self.get_weights(all_possible_visitor_tasks)
+            random_task = random.choices(all_possible_visitor_tasks, weights)[0]
 
             if random_task == VisitorTasks.STUDY:
                 remaining_subtasks = [Walk(self.person, self.destinations, Destination.DESK), Stay(self.person)]
@@ -214,9 +199,21 @@ class CompositeTask:
             elif random_task == VisitorTasks.GET_HELP:
                 remaining_subtasks = [Walk(self.person, self.destinations, Destination.HELPDESK), Stay(self.person)]
 
+        # # Prepare composite task for staff
+        # # TODO: Continue here! Simulation breaks atm
+        # if isinstance(self.person, Staff):
+        #
+        #     weights = self.get_weights(all_possible_staff_tasks)
+        #     random_task = random.choices(all_possible_staff_tasks, weights)[0]
+        #
+        #     if random_task == StaffTasks.PROVIDE_HELP:
+        #         remaining_subtasks = [Stay(self.person)]  # Helping could be more complex (interaction with visitor?)
+        #     elif random_task == StaffTasks.WORK_IN_OFFICE:
+        #         remaining_subtasks = [Stay(self.person)]
+
         return remaining_subtasks
 
-    def get_weights(self):
+    def get_weights(self, tasks):
         """
         This function returns weights for random.choices depending on how many desk, shelf, and help desk destinations there are.
         :return: weights: list with floats adding to up 1
@@ -225,7 +222,7 @@ class CompositeTask:
         weights = []
         w = 1
 
-        for task in self.all_possible_tasks:
+        for task in tasks:
             if task == VisitorTasks.STUDY:
                 w = len(self.destinations[Destination.DESK])
             elif task == VisitorTasks.GET_BOOK:
