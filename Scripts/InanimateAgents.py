@@ -50,3 +50,13 @@ class Obstacle(Item):
 
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
+
+class WalkableFloor(Item):
+    # useful to note: can spawn people on these spaces
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)
+
+class OutOfBounds(Item):
+
+    def __init__(self, unique_id, model):
+        super().__init__(unique_id, model)

@@ -1,7 +1,6 @@
-from Scripts.ToyModel import *
-from mesa.visualization.modules import CanvasGrid
-from mesa.visualization.ModularVisualization import ModularServer
 from queue import PriorityQueue
+from Scripts.AnimateAgents import *
+from Scripts.InanimateAgents import *
 
 
 def get_all_paths(grid):
@@ -163,75 +162,3 @@ def init_destinations(grid):
                     destinations_list.append(pos)
 
     return destinations_list
-
-
-def create_toy_space(visalize=False):
-    """
-    This function creates a multi-grid space and fills it with some inanimate agents.
-    """
-
-    if visalize:
-        show_visualization(ToyModel)
-    else:
-        model = ToyModel(width=20, height=15)
-        return model.grid
-
-
-def show_visualization(model):
-    """
-    Creates an animation, given a model type (e.g. EvacuationModel)
-    """
-
-    def agent_portrayal(agent):
-        """
-        This function determines how agents should look like (color, shape, etc.)
-        """
-
-        portrayal = {"Filled": "true",
-                     "Layer": 0}
-
-        if isinstance(agent, Wall):
-            portrayal["Shape"] = "rect"
-            portrayal["Color"] = "gray"
-            portrayal["h"] = 1
-            portrayal["w"] = 1
-
-        if isinstance(agent, Exit):
-            portrayal["Shape"] = "rect"
-            portrayal["Color"] = "red"
-            portrayal["h"] = 1
-            portrayal["w"] = 1
-
-        if isinstance(agent, Visitor):
-            portrayal["Shape"] = "circle"
-            portrayal["Color"] = "blue"
-            portrayal["r"] = 0.5
-
-        # More agents would be necessary to check for here
-
-        return portrayal
-
-    # Parameters
-    width = 20
-    height = 15
-    size = 20
-
-    canvas = CanvasGrid(agent_portrayal, width, height, size * width, size * height)
-
-    server = ModularServer(model,
-                           [canvas],
-                           "Evacuation Model",
-                           {"width": width, "height": height})
-    server.port = 8521  # The default
-    server.launch()
-
-
-if __name__ == "__main__":
-    toy_grid = create_toy_space(visalize=False)
-    # start = (1, 13)  # upper left corner
-    # end = (5, 11)  # 4 cells further to the right
-    # final_path = a_star_search(toy_grid, start, end)
-    # print(final_path)
-
-    paths = get_all_paths(toy_grid)
-    print(f'Number of paths: {len(paths)}')
