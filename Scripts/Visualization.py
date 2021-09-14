@@ -37,6 +37,20 @@ def show_visualization(model):
             portrayal["w"] = 1
             portrayal["Name"] = 'chair'
 
+        if isinstance(agent, ShelfInteractive):
+            portrayal["Shape"] = "rect"
+            portrayal["Color"] = "green"
+            portrayal["h"] = 1
+            portrayal["w"] = 1
+            portrayal["Name"] = 'shelf'
+
+        if isinstance(agent, HelpDeskInteractiveForHelpee):
+            portrayal["Shape"] = "rect"
+            portrayal["Color"] = "purple"
+            portrayal["h"] = 1
+            portrayal["w"] = 1
+            portrayal["Name"] = 'help desk'
+
         if isinstance(agent, ExitA) or isinstance(agent, ExitB) or isinstance(agent, ExitC):
             portrayal["Shape"] = "rect"
             portrayal["Color"] = "red"

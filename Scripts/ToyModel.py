@@ -1,12 +1,9 @@
-import random
-
 from mesa import Model
 from mesa.time import RandomActivation
 from mesa.space import MultiGrid
 
 from Scripts.AnimateAgents import *
 from Scripts.InanimateAgents import *
-from Scripts.Tasks import *
 
 
 class ToyModel(Model):
@@ -29,7 +26,6 @@ class ToyModel(Model):
         self.not_spawnable_objects = [Wall, Obstacle, Desk, OutOfBounds, Exit, HelpDesk, Shelf, DeskInteractive,
                                       HelpDeskInteractiveForHelpee, HelpDeskInteractiveForHelper, ShelfInteractive]
         self.spawn_visitors(n=n_visitors)
-
 
     def step(self):
 
@@ -133,25 +129,27 @@ class ToyModel(Model):
         self.grid.place_agent(agent=DeskInteractive(4, self), pos=pos)
         self.destinations[Destination.DESK].append(pos)
 
+        # shelves interactive
+        pos = (12, 11)
+        self.grid.place_agent(agent=ShelfInteractive(0, self), pos=pos)
+        self.destinations[Destination.SHELF].append(pos)
 
-        """Place a visitor"""
+        pos = (8, 3)
+        self.grid.place_agent(agent=ShelfInteractive(1, self), pos=pos)
+        self.destinations[Destination.SHELF].append(pos)
 
-        # Create first composite task
+        pos = (9, 4)
+        self.grid.place_agent(agent=ShelfInteractive(2, self), pos=pos)
+        self.destinations[Destination.SHELF].append(pos)
 
-        # # 1st visitor
-        # pos = (1, self.grid.height-2)
-        # visitor1 = Visitor(0, self, gender=Gender.MALE)
-        # self.grid.place_agent(agent=visitor1, pos=pos)
-        # self.schedule.add(visitor1)
-        #
-        # # 2nd visitor
-        # start = (18, 12)  # lower left corner
-        # visitor2 = Visitor(1, self, gender=Gender.FEMALE)
-        # end = (4, 3)  # chair
-        # path = a_star_search(self.grid, start, end)
-        # visitor2.path_to_current_dest = path
-        # self.grid.place_agent(agent=visitor2, pos=start)
-        # self.schedule.add(visitor2)
+        # HelpDesk interactive
+        pos = (8, 8)
+        self.grid.place_agent(agent=HelpDeskInteractiveForHelpee(0, self), pos=pos)
+        self.destinations[Destination.HELPDESK].append(pos)
+
+        pos = (3, 13)
+        self.grid.place_agent(agent=HelpDeskInteractiveForHelpee(0, self), pos=pos)
+        self.destinations[Destination.HELPDESK].append(pos)
 
     def get_all_spawnable_cells(self):
         """

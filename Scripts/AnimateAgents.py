@@ -182,25 +182,62 @@ class CompositeTask:
     def __init__(self, person, model):
         """
         :param person: Person: person that holds this composite task
-        :param task_name:
         """
 
         self.person = person
         self.model = model
         self.destinations = model.destinations
+
         self.remaining_subtasks = self.generate_sub_tasks()
 
     def generate_sub_tasks(self):
 
         remaining_subtasks = []
 
+        # Sample a random task
+        self.all_possible_tasks = [VisitorTasks.STUDY,
+                              VisitorTasks.GET_BOOK,
+                              VisitorTasks.GET_HELP]  # TODO: To be extended
+        weights = self.get_weights()
+
+        random_task = random.choices(self.all_possible_tasks, weights)[0]
+
+        # Prepare composite task
         if isinstance(self.person, Visitor):
 
-            # TODO: Currently hardcoded to STUDY, should generalize to many tasks
-            remaining_subtasks = [Walk(self.person, self.destinations, Destination.DESK),
-                                  Stay(self.person)]
+            if random_task == VisitorTasks.STUDY:
+                remaining_subtasks = [Walk(self.person, self.destinations, Destination.DESK), Stay(self.person)]
+
+            elif random_task == VisitorTasks.GET_BOOK:
+                remaining_subtasks = [Walk(self.person, self.destinations, Destination.SHELF), Stay(self.person)]
+
+            elif random_task == VisitorTasks.GET_HELP:
+                remaining_subtasks = [Walk(self.person, self.destinations, Destination.HELPDESK), Stay(self.person)]
 
         return remaining_subtasks
+
+    def get_weights(self):
+        """
+        This function returns weights for random.choices depending on how many desk, shelf, and help desk destinations there are.
+        :return: weights: list with floats adding to up 1
+        """
+
+        weights = []
+        w = 1
+
+        for task in self.all_possible_tasks:
+            if task == VisitorTasks.STUDY:
+                w = len(self.destinations[Destination.DESK])
+            elif task == VisitorTasks.GET_BOOK:
+                w = len(self.destinations[Destination.SHELF])
+            elif task == VisitorTasks.GET_HELP:
+                w = len(self.destinations[Destination.HELPDESK])
+            weights.append(w)
+
+        # norammlize weights
+        weights = [i/sum(weights) for i in weights]
+
+        return weights
 
     def do(self):
 
@@ -217,11 +254,11 @@ class CompositeTask:
 
         # if current subtask should still run
         elif not current_subtask.is_done():
+
             if isinstance(current_subtask, Walk):
-                # print(f'agent position: \t{self.person.pos}')
-                # print(f'current path: \t{self.person.path_to_current_dest}')
                 picked_destination = current_subtask.destination
                 self.person.walk(picked_destination)
+
             elif isinstance(current_subtask, Stay):
                 self.person.stay()
 
@@ -230,11 +267,6 @@ class CompositeTask:
             # remove finished subtask from remaining substasks
             if current_subtask.is_done():
                 self.remaining_subtasks = self.remaining_subtasks[1:]
-
-
-
-
-
 
 
 class BasicTaskName(Enum):
@@ -279,10 +311,9 @@ class Walk(BasicTask):
         if destination_type is not None:
             self.destination_type = destination_type
         else:
-            self.destination_type = Destination.DESK  # TODO: This might be different, dependent on what the destination_type really is
+            self.destination_type = Destination.DESK
 
         self.destination = self.get_random_destination()
-        # print('new destination in Walk object')
 
     def get_random_destination(self):
         """
@@ -327,7 +358,7 @@ class Stay(BasicTask):
         if duration is not None:
             self.remaining_duration = duration
         else:
-            self.remaining_duration = random.uniform(3, 8)  # TODO: other numbers are needed
+            self.remaining_duration = random.uniform(5, 20)  # TODO: other numbers are needed
 
     def is_done(self):
         self.person.busy = False
@@ -337,12 +368,12 @@ class Stay(BasicTask):
         self.remaining_duration -= 1
 
 
-# class VisitorTasks(Enum):
-#     STUDY = 1
-#     GET_HELP = 2
-#     GET_BOOK = 3
-#
-#
-# class StaffTasks(Enum):
-#     PROVIDE_HELP = 1
-#     WORK_IN_OFFICE = 2
+class VisitorTasks(Enum):
+    STUDY = 1
+    GET_HELP = 2
+    GET_BOOK = 3
+
+
+class StaffTasks(Enum):
+    PROVIDE_HELP = 1
+    WORK_IN_OFFICE = 2
