@@ -1,7 +1,5 @@
 from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
-from Scripts.AnimateAgents import *
-from Scripts.InanimateAgents import *
 from Scripts.ToyModel import *
 
 
@@ -48,10 +46,10 @@ def show_visualization(model):
 
         if isinstance(agent, Visitor):
             portrayal["Shape"] = "circle"
-            if agent.gender == Gender.MALE:
+            if not agent.busy:
                 portrayal["Color"] = "blue"  # Those colors are just for now
             else:
-                portrayal["Color"] = "pink"
+                portrayal["Color"] = "green"
             portrayal["r"] = 0.5
             portrayal["Layer"]: 1
             portrayal["Name"] = 'visitor'

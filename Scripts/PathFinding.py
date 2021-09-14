@@ -1,5 +1,4 @@
 from queue import PriorityQueue
-from Scripts.AnimateAgents import *
 from Scripts.InanimateAgents import *
 
 
