@@ -70,7 +70,6 @@ class ToyModel(Model):
         for i in range(self.grid.width):
             if i < 9:
                 self.grid.place_agent(agent=Wall(0, self), pos=(i, 10))
-
             if i > 7:
                 self.grid.place_agent(agent=Wall(0, self), pos=(i, 3))
 
@@ -81,8 +80,26 @@ class ToyModel(Model):
             if i > 5:
                 self.grid.place_agent(agent=Wall(0, self), pos=(11, i))
 
-        """Place a visitor"""
-        visitor = Visitor(0, self, gender=Gender.MALE)
+        # desk
+        for i in range(self.grid.width):
+            if 12 <= i <= 16:
+                self.grid.place_agent(agent=Desk(0, self), pos=(i, 13))
+                self.grid.place_agent(agent=Desk(0, self), pos=(i, 12))
 
-        self.grid.place_agent(agent=visitor, pos=(1, self.grid.height-2))
-        self.schedule.add(visitor)
+        # desk interactive (aka chair)
+        self.grid.place_agent(agent=DeskInteractive(0, self), pos=(14, 11))
+
+        """Place a visitor"""
+        # 1st visitor
+        visitor1 = Visitor(0, self, gender=Gender.MALE)
+        self.grid.place_agent(agent=visitor1, pos=(1, self.grid.height-2))
+        self.schedule.add(visitor1)
+
+        # 2nd visitor
+        visitor2 = Visitor(1, self, gender=Gender.FEMALE)
+        start = (1, 1)  # lower left corner
+        end = (14, 11)  # chair
+        path = a_star_search(self.grid, start, end)
+        visitor2.path_to_current_dest = path
+        self.grid.place_agent(agent=visitor2, pos=(1, 1))
+        self.schedule.add(visitor2)

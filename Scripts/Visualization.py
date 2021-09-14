@@ -23,24 +23,45 @@ def show_visualization(model):
             portrayal["Color"] = "gray"
             portrayal["h"] = 1
             portrayal["w"] = 1
+            portrayal["Name"] = 'wall'
+
+        if isinstance(agent, Desk):
+            portrayal["Shape"] = "rect"
+            portrayal["Color"] = "brown"
+            portrayal["h"] = 1
+            portrayal["w"] = 1
+            portrayal["Name"] = 'desk'
+
+        if isinstance(agent, DeskInteractive):
+            portrayal["Shape"] = "rect"
+            portrayal["Color"] = "orange"
+            portrayal["h"] = 1
+            portrayal["w"] = 1
+            portrayal["Name"] = 'chair'
 
         if isinstance(agent, ExitA) or isinstance(agent, ExitB) or isinstance(agent, ExitC):
             portrayal["Shape"] = "rect"
             portrayal["Color"] = "red"
             portrayal["h"] = 1
             portrayal["w"] = 1
+            portrayal["Name"] = 'exit'
 
         if isinstance(agent, Visitor):
             portrayal["Shape"] = "circle"
-            portrayal["Color"] = "blue"
+            if agent.gender == Gender.MALE:
+                portrayal["Color"] = "blue"  # Those colors are just for now
+            else:
+                portrayal["Color"] = "pink"
             portrayal["r"] = 0.5
             portrayal["Layer"]: 1
+            portrayal["Name"] = 'visitor'
 
         if isinstance(agent, Staff):
             portrayal["Shape"] = "circle"
             portrayal["Color"] = "green"
             portrayal["r"] = 0.5
             portrayal["Layer"]: 1
+            portrayal["Name"] = 'staff'
 
         # TODO: More checks for agents would be necessary here
 

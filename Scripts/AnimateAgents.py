@@ -62,10 +62,10 @@ class Person(Agent):
         :return:            float, default speed of the person
         """
         # Specifying speeds
-        male_dict = {Movement.RUNNING: 0.1,  # orig: 1.5
-                     Movement.WALKING: 0.1}  # orig; 1.0
-        female_dict = {Movement.RUNNING: 1.4,
-                       Movement.WALKING: 0.9}
+        male_dict = {Movement.RUNNING: 0.1,  # original 1.5
+                     Movement.WALKING: 0.1}  # original 1.0
+        female_dict = {Movement.RUNNING: 0.1,  # original 1.4
+                       Movement.WALKING: 0.1}  # origional 0.9
 
         # Read movement-speed from the right dictionary & return it.
         speed = 0.0  # Heads-up: If gender would be sth else than MALE/FEMALE, speed would always be 0.
