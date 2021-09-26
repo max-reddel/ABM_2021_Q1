@@ -26,6 +26,7 @@ class ToyModel(Model):
                              Destination.HELPDESK: []}
 
         self.alarm = Alarm(self.next_id(), self)
+        self.grid.place_agent(self.alarm, (2, 6))
 
         # Create and add agents to the grid and schedule
         self.fill_grid()

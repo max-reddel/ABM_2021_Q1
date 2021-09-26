@@ -72,6 +72,16 @@ def show_visualization(model):
             portrayal["Layer"]: 0
             portrayal["Name"] = 'staff'
 
+        if isinstance(agent, Alarm):
+            portrayal["Shape"] = "circle"
+            portrayal["Color"] = "green"
+            portrayal["r"] = 1.5
+            portrayal["Layer"]: 0
+            portrayal["Name"] = 'staff'
+            if agent.is_activated and agent.model.schedule.time % 2 == 0:
+                portrayal["Color"] = "red"
+                portrayal["r"] = 2
+
         # TODO: More checks for agents would be necessary here
 
         return portrayal
