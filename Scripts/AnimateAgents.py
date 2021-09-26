@@ -112,7 +112,8 @@ class MovementData:
             speed = female_dict[movement]
         return speed
 
-    def sample_entrance(self):
+    @staticmethod
+    def sample_entrance():
         """
         Samples an entrance for a person.
         :return:        Enum of possible Entrances/Exits

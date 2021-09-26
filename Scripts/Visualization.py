@@ -14,7 +14,7 @@ def show_visualization(model):
         """
 
         portrayal = {"Filled": "true",
-                     "Layer": 0}
+                     "Layer": 1}
 
         if isinstance(agent, Wall) or isinstance(agent, Obstacle):
             portrayal["Shape"] = "rect"
@@ -61,15 +61,15 @@ def show_visualization(model):
         if isinstance(agent, Visitor):
             portrayal["Shape"] = "circle"
             portrayal["Color"] = "blue"
-            portrayal["r"] = 0.5
-            portrayal["Layer"]: 1
+            portrayal["r"] = 1.5
+            portrayal["Layer"]: 0
             portrayal["Name"] = 'visitor'
 
         if isinstance(agent, Staff):
             portrayal["Shape"] = "circle"
             portrayal["Color"] = "green"
-            portrayal["r"] = 0.8
-            portrayal["Layer"]: 1
+            portrayal["r"] = 1.5
+            portrayal["Layer"]: 0
             portrayal["Name"] = 'staff'
 
         # TODO: More checks for agents would be necessary here

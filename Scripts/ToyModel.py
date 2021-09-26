@@ -136,7 +136,7 @@ class ToyModel(Model):
         self.grid.place_agent(agent=ShelfInteractive(0, self), pos=pos)
         self.destinations[Destination.SHELF].append(pos)
 
-        pos = (8, 3)
+        pos = (7, 3)
         self.grid.place_agent(agent=ShelfInteractive(1, self), pos=pos)
         self.destinations[Destination.SHELF].append(pos)
 

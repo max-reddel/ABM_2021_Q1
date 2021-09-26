@@ -42,7 +42,7 @@ def a_star_search(grid, origin, destination,
         unwalkable_objects_list = [Wall, Obstacle, Desk, HelpDesk, Shelf, OutOfBounds]
 
     frontier = PriorityQueue()
-    frontier.put(origin, 0)
+    frontier.put(origin, False)
     path = {}  # This will be sth like a linked list
     cost_so_far = {}
     path[origin] = None

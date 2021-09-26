@@ -18,6 +18,10 @@ class CompositeTask:
         self.remaining_subtasks = self.generate_sub_tasks()
 
     def generate_sub_tasks(self):
+        """
+        This function randomly generates a list of sub-tasks for visitors or staff.
+        :return: remaining_tasks: list with sub-tasks
+        """
 
         remaining_subtasks = []
 
@@ -30,14 +34,19 @@ class CompositeTask:
             remaining_subtasks = self.generate_visitor_sub_tasks(all_possible_visitor_tasks)
 
         # # Prepare composite task for staff
-        # if self.person.__class__.__name__ == "Staff":
-        #     self.generate_staff_sub_tasks(all_possible_staff_tasks)
+        elif self.person.__class__.__name__ == "Staff":
+            self.generate_staff_sub_tasks(all_possible_staff_tasks)
 
         return remaining_subtasks
 
     def generate_staff_sub_tasks(self, all_possible_staff_tasks):
+        """
+        This function randomly generates a list of sub-tasks for staff.
 
-        # TODO: Continue here! Simulation breaks atm
+        :param: all_possible_staff_tasks: list with all StaffTasks in it.
+        :return: remaining_tasks: list with sub-tasks
+        """
+
         remaining_subtasks = []
 
         weights = self.get_weights(all_possible_staff_tasks)
@@ -51,6 +60,12 @@ class CompositeTask:
         return remaining_subtasks
 
     def generate_visitor_sub_tasks(self, all_possible_visitor_tasks):
+        """
+        This function randomly generates a list of sub-tasks for visitors.
+
+        :param: all_possible_staff_tasks: list with all VisitorTasks in it.
+        :return: remaining_tasks: list with sub-tasks
+        """
 
         remaining_subtasks = []
 
@@ -93,18 +108,14 @@ class CompositeTask:
 
     def do(self):
 
-        try:
-            current_subtask = self.remaining_subtasks[0]
-        except:
-            pass
-
         # If all tasks are done
         if not self.remaining_subtasks:
             self.remaining_subtasks = self.generate_sub_tasks()
 
         # if current subtask should still run
-        elif not current_subtask.is_done():
+        elif not self.remaining_subtasks[0].is_done():
 
+            current_subtask = self.remaining_subtasks[0]
             current_subtask.do()
             current_subtask.update()
 
@@ -217,7 +228,7 @@ class Stay(BasicTask):
         if duration is not None:
             self.remaining_duration = duration
         else:
-            self.remaining_duration = random.uniform(5, 20)  # TODO: other numbers are needed
+            self.remaining_duration = random.uniform(5, 20)
 
     def is_done(self):
         self.person.busy = False
