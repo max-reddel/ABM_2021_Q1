@@ -107,3 +107,23 @@ class OutOfBounds(Item):
 
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
+
+
+class Alarm(Agent):
+
+    def __init__(self, unique_id, model, timer=30):
+
+        super().__init__(unique_id, model)
+
+        self.is_activated = False
+        self.timer = timer
+
+        self.model.schedule.add(self)
+
+    def step(self):
+
+        self.timer -= 1
+        if self.timer <= 0:
+            self.is_activated = True
+            self.model.schedule.remove(self)
+
