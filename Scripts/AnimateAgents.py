@@ -168,6 +168,7 @@ class CompositeTask:
     def __init__(self, person, model):
         """
         :param person: Person: person that holds this composite task
+        :param model: Model
         """
 
         self.person = person
