@@ -44,11 +44,6 @@ class Person(Agent):
 
     def step(self):
 
-        # if task done:             # check this in self.current_task attributes
-        #   sample_new_task()
-        # continue task
-
-        # self.walk()
         self.current_task.do()
 
     def get_default_speed(self, movement):
@@ -104,42 +99,6 @@ class Person(Agent):
             if random.random() <= probability:
                 knows_exits = True
         return knows_exits
-
-    def walk(self, destination):
-        """
-        Makes the agent walk. By moving it from its current position, into the direction of their current destination,
-        with its speed being adjusted to whether it is an emergency (i.e., adjusted the Movement mode)
-        and the amount of people nearby.
-
-        Disclaimer: Currently still basic version. Only walking into right direction.
-        """
-        self.path_to_current_dest = a_star_search(self.model.grid, self.pos, destination)
-
-        # Calculate how many cells you can travel
-
-        stride_length = int(self.default_walking_speed * 10)
-
-        try:
-            # Find cell you should move to
-            new_pos = self.path_to_current_dest[stride_length]
-            # Adjust remaining path
-            self.path_to_current_dest = self.path_to_current_dest[stride_length:]
-        except:
-            # Find cell you should move to (if stride is overreaching destination)
-            new_pos = self.path_to_current_dest[-1]
-            # Adjust remaining path
-            self.path_to_current_dest = [self.path_to_current_dest[-1]]
-
-        # Adjust agent-placement on grid
-        self.model.grid.move_agent(agent=self, pos=new_pos)
-
-        # print(f"Agent walked to position: {new_pos}")
-
-    def stay(self):
-        """
-        """
-        # TODO: Maybe engage with the object in place?
-        self.busy = True
 
 
 class Visitor(Person):
@@ -253,13 +212,7 @@ class CompositeTask:
         # if current subtask should still run
         elif not current_subtask.is_done():
 
-            if isinstance(current_subtask, Walk):
-                picked_destination = current_subtask.destination
-                self.person.walk(picked_destination)
-
-            elif isinstance(current_subtask, Stay):
-                self.person.stay()
-
+            current_subtask.do()
             current_subtask.update()
 
             # remove finished subtask from remaining substasks
@@ -296,6 +249,9 @@ class BasicTask:
     def update(self):
         pass
 
+    def do(self):
+        pass
+
 
 class Walk(BasicTask):
 
@@ -312,6 +268,34 @@ class Walk(BasicTask):
             self.destination_type = Destination.DESK
 
         self.destination = self.get_random_destination()
+
+    def do(self):
+        """
+        Makes the agent walk. By moving it from its current position, into the direction of their current destination,
+        with its speed being adjusted to whether it is an emergency (i.e., adjusted the Movement mode)
+        and the amount of people nearby.
+
+        Disclaimer: Currently still basic version. Only walking into right direction.
+        """
+        self.person.path_to_current_dest = a_star_search(self.person.model.grid, self.person.pos, self.destination)
+
+        # Calculate how many cells you can travel
+
+        stride_length = int(self.person.default_walking_speed * 10)
+
+        try:
+            # Find cell you should move to
+            new_pos = self.person.path_to_current_dest[stride_length]
+            # Adjust remaining path
+            self.person.path_to_current_dest = self.person.path_to_current_dest[stride_length:]
+        except:
+            # Find cell you should move to (if stride is overreaching destination)
+            new_pos = self.person.path_to_current_dest[-1]
+            # Adjust remaining path
+            self.person.path_to_current_dest = [self.person.path_to_current_dest[-1]]
+
+        # Adjust agent-placement on grid
+        self.person.model.grid.move_agent(agent=self.person, pos=new_pos)
 
     def get_random_destination(self):
         """
@@ -364,6 +348,13 @@ class Stay(BasicTask):
 
     def update(self):
         self.remaining_duration -= 1
+
+    def do(self):
+        """
+        Stay.
+        """
+        # TODO: Maybe engage with the object in place?
+        self.busy = True
 
 
 class VisitorTasks(Enum):
