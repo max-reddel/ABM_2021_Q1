@@ -4,6 +4,8 @@ from mesa.space import MultiGrid
 
 from Scripts.AnimateAgents import *
 from Scripts.InanimateAgents import *
+# from Scripts.Tasks import Destination
+from Enums import *
 
 
 class ToyModel(Model):
