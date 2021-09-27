@@ -1,4 +1,5 @@
 from Scripts.Visualization import *
+from Scripts.MappingModel import *
 from Enums import *
 import seaborn as sns
 import pandas as pd
@@ -77,8 +78,8 @@ class Experiment:
         :return evac_time: int
         """
 
-        if visualize:
-            show_visualization(ToyModel)
+    if visualize:
+        show_visualization(MapModel)
 
         else:
 
