@@ -16,11 +16,55 @@ class Person(Agent):
 
         self.move_data = MovementData(self.gender)
         self.emergency_knowledge = EmergencyKnowledge()
-        self.current_task = CompositeTask(self, self.model)  # CompositeTask object
+        self.current_task = CompositeTask(self, self.model)
 
     def step(self):
 
         self.current_task.do()
+
+    def get_nr_of_neighbors(self, agent_type, radius=6):
+        """
+        Check whether there are any specific types of agents around this agent and return how many. Radius is 6 dm
+        because the speed will need to be adjusted. This adjustment is dependent on the square meter that an agent is
+        in. So, if the area should be 1 m2, then the radius needs to be roughly 0.56 m. Rounding to 0.6.
+        :param: radius: int
+        :param: agent_type: Agent (Person, Staff, Visitor, or any other)
+        :return: nr_of_neighbors: int
+        """
+
+        # get all neighbors (including inanimate agents
+        all_agents = self.model.grid.get_neighbors(pos=self.pos, moore=True, include_center=False, radius=radius)
+
+        # filter out all inanimate agents
+        animate_agents = [x for x in all_agents if isinstance(x, agent_type)]
+        nr_of_neighbors = len(animate_agents)
+
+        return nr_of_neighbors
+
+    def scan_environment_for_evacuation(self, agent_type, radius=500):
+        """
+        Check whether there are any specific types of agents around and how many seem to be evacuating.
+        :param: radius: int
+        :param: agent_type: Agent (Person, Staff, Visitor, or any other)
+        :return: evacuating_ratio: float
+        """
+
+        # get all neighbors (including inanimate agents
+        all_agents = self.model.grid.get_neighbors(pos=self.pos, moore=True, include_center=False, radius=radius)
+
+        # filter out all inanimate agents
+        animate_agents = [x for x in all_agents if isinstance(x, agent_type)]
+
+        nr_of_neighbors = len(animate_agents)
+
+        # Check how many neighbors are evacuating
+        evacuating_neighbors = [x for x in animate_agents if x.emergency_knolwedge.is_evacuating]
+
+        if nr_of_neighbors == 0:
+            return 0
+        else:
+            evacuating_ratio = float(len(evacuating_neighbors) / nr_of_neighbors)
+            return evacuating_ratio
 
 
 class Visitor(Person):
@@ -31,6 +75,11 @@ class Visitor(Person):
 
         self.emergency_knowledge.sample_safety_training(probability=0.1)  # Few visitors had safety training
         self.emergency_knowledge.knows_exits = self.emergency_knowledge.get_knows_exits(probability=0.1)
+
+    def step(self):
+
+        # self.move_data.update_speed(self)
+        self.current_task.do()
 
 
 class Staff(Person):
@@ -48,11 +97,12 @@ class EmergencyKnowledge:
     def __init__(self):
 
         self.had_safety_training = False
-        self.knows_exits = False  # knows all exits?
+        self.knows_exits = False
         self.exit_time = None
         self.exit_location = None
-        self.heard_alarm = False  # self.model.alarm_rang()  # Later: implement this in model class.
-        # Currently: alarm goes off --> all agents hear it. Thus, boolean depends on whether it rang already or not.
+        self.entered_via = self.sample_entrance()  # from which entrance/exit they entered the building
+        self.heard_alarm = False
+        self.is_evacuating = False
 
     def sample_safety_training(self, probability=0.1):
         """
@@ -80,6 +130,15 @@ class EmergencyKnowledge:
                 knows_exits = True
         return knows_exits
 
+    @staticmethod
+    def sample_entrance():
+        """
+        Samples an entrance for a person.
+        :return:        Enum of possible Entrances/Exits
+        """
+        entrance = "main entrance"  # Later: create Entrance Enum, actually sample from it
+        return entrance
+
 
 class MovementData:
 
@@ -89,7 +148,7 @@ class MovementData:
 
         self.default_walking_speed = self.get_default_speed(Movement.WALKING)
         self.default_running_speed = self.get_default_speed(Movement.RUNNING)
-        self.entered_via = self.sample_entrance()  # from which entrance/exit they entered the building
+        self.walking_speed = self.default_walking_speed
         self.path_to_current_dest = []  # First element is current position.
 
     def get_default_speed(self, movement):
@@ -112,11 +171,16 @@ class MovementData:
             speed = female_dict[movement]
         return speed
 
-    @staticmethod
-    def sample_entrance():
+    def update_speed(self, person):
         """
-        Samples an entrance for a person.
-        :return:        Enum of possible Entrances/Exits
+        This function adjust the speed of an agent depending on how many neighbors an agent has in its 6 dm radius.
+        :param person: Person
         """
-        entrance = "main entrance"  # Later: create Entrance Enum, actually sample from it
-        return entrance
+        nr_of_neighbors = person.get_nr_of_neighbors(agent_type=Person, radius=6)
+
+        if nr_of_neighbors <= 0:
+            self.walking_speed = self.default_walking_speed
+        elif nr_of_neighbors >= 8:
+            self.walking_speed = 1
+        else:
+            self.walking_speed = self.default_walking_speed / nr_of_neighbors

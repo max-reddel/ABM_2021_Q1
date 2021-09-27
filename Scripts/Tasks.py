@@ -169,7 +169,7 @@ class Walk(BasicTask):
         self.person.move_data.path_to_current_dest = a_star_search(self.person.model.grid, self.person.pos, self.destination)
 
         # Calculate how many cells you can travel
-        stride_length = int(self.person.move_data.default_walking_speed * 10)
+        stride_length = int(self.person.move_data.walking_speed * 10)
 
         try:
             # Find cell you should move to

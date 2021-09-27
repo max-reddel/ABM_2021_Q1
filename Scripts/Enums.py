@@ -31,8 +31,10 @@ class VisitorTasks(Enum):
     STUDY = 1
     GET_HELP = 2
     GET_BOOK = 3
+    EVACUATE = 4
 
 
 class StaffTasks(Enum):
     PROVIDE_HELP = 1
     WORK_IN_OFFICE = 2
+    EVACUATE = 4
