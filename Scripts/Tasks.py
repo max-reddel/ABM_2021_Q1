@@ -108,20 +108,47 @@ class CompositeTask:
 
     def do(self):
 
-        # If all tasks are done
-        if not self.remaining_subtasks:
-            self.remaining_subtasks = self.generate_sub_tasks()
+        if not self.person.emergency_knowledge.is_evacuating:
 
-        # if current subtask should still run
-        elif not self.remaining_subtasks[0].is_done():
+            # If all tasks are done
+            if not self.remaining_subtasks:
+                self.remaining_subtasks = self.generate_sub_tasks()
 
-            current_subtask = self.remaining_subtasks[0]
-            current_subtask.do()
-            current_subtask.update()
+            # if current subtask should still run
+            elif not self.remaining_subtasks[0].is_done():
 
-            # remove finished subtask from remaining substasks
-            if current_subtask.is_done():
-                self.remaining_subtasks = self.remaining_subtasks[1:]
+                current_subtask = self.remaining_subtasks[0]
+                current_subtask.do()
+                current_subtask.update()
+
+                # remove finished subtask from remaining substasks
+                if current_subtask.is_done():
+                    self.remaining_subtasks = self.remaining_subtasks[1:]
+
+        else:
+            if not self.person.emergency_knowledge.left:
+
+                exit_destination = self.person.emergency_knowledge.entered_via
+                self.remaining_subtasks = [Walk(self.person, self.destinations, destination=exit_destination)]
+
+            # Interrupt immediately
+            # If already evacuated
+            if not self.remaining_subtasks:
+
+                self.model.schedule.remove(self.person)
+                self.model.grid.remove_agent(self.person)
+                self.person.emergency_knowledge.left = True
+
+                # if current subtask should still run
+            elif not self.remaining_subtasks[0].is_done():
+
+                current_subtask = self.remaining_subtasks[0]
+                current_subtask.do()
+                current_subtask.update()
+
+                # remove finished subtask from remaining substasks
+                if current_subtask.is_done():
+                    self.remaining_subtasks = self.remaining_subtasks[1:]
 
 
 class BasicTask:
@@ -144,7 +171,7 @@ class BasicTask:
 
 class Walk(BasicTask):
 
-    def __init__(self, person, destinations, destination_type=None):
+    def __init__(self, person, destinations, destination_type=None, destination=None):
 
         super().__init__(person)
 
@@ -156,7 +183,10 @@ class Walk(BasicTask):
         else:
             self.destination_type = Destination.DESK
 
-        self.destination = self.get_random_destination()
+        if destination is None:
+            self.destination = self.get_random_destination()
+        else:
+            self.destination = destination
 
     def do(self):
         """

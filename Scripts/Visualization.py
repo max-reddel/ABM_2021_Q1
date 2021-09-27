@@ -61,20 +61,20 @@ def show_visualization(model):
         if isinstance(agent, Visitor):
             portrayal["Shape"] = "circle"
             portrayal["Color"] = "blue"
-            portrayal["r"] = 1.5
-            portrayal["Layer"]: 0
+            portrayal["r"] = 0.8
+            portrayal["Layer"] = 0
             portrayal["Name"] = 'visitor'
 
         if isinstance(agent, Staff):
             portrayal["Shape"] = "circle"
             portrayal["Color"] = "green"
-            portrayal["r"] = 1.5
-            portrayal["Layer"]: 0
+            portrayal["r"] = 0.8
+            portrayal["Layer"] = 0
             portrayal["Name"] = 'staff'
 
         if isinstance(agent, Alarm):
             portrayal["Shape"] = "circle"
-            portrayal["Color"] = "green"
+            portrayal["Color"] = "blue"
             portrayal["r"] = 1.5
             portrayal["Layer"]: 0
             portrayal["Name"] = 'staff'

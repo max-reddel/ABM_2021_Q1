@@ -15,7 +15,7 @@ class Person(Agent):
         self.busy = False  # interacting with another object (Desk, Shelf, etc.)
 
         self.move_data = MovementData(self.gender)
-        self.emergency_knowledge = EmergencyKnowledge()
+        self.emergency_knowledge = EmergencyKnowledge(self)
         self.current_task = CompositeTask(self, self.model)
 
     def step(self):
@@ -79,6 +79,10 @@ class Visitor(Person):
     def step(self):
 
         # self.move_data.update_speed(self)
+
+        # Super simple version of knowing about the alarm
+        if self.model.alarm.is_activated:
+            self.emergency_knowledge.is_evacuating = True
         self.current_task.do()
 
 
@@ -94,8 +98,9 @@ class Staff(Person):
 
 class EmergencyKnowledge:
 
-    def __init__(self):
+    def __init__(self, person):
 
+        self.person = person
         self.had_safety_training = False
         self.knows_exits = False
         self.exit_time = None
@@ -103,6 +108,7 @@ class EmergencyKnowledge:
         self.entered_via = self.sample_entrance()  # from which entrance/exit they entered the building
         self.heard_alarm = False
         self.is_evacuating = False
+        self.left = False
 
     def sample_safety_training(self, probability=0.1):
         """
@@ -130,14 +136,15 @@ class EmergencyKnowledge:
                 knows_exits = True
         return knows_exits
 
-    @staticmethod
-    def sample_entrance():
+    def sample_entrance(self):
         """
-        Samples an entrance for a person.
-        :return:        Enum of possible Entrances/Exits
+        Samples an entrance/exit for a person.
+        :return: random_exit: pos
         """
-        entrance = "main entrance"  # Later: create Entrance Enum, actually sample from it
-        return entrance
+        exits = self.person.model.destinations[Destination.EXIT]
+        random_exit = random.choice(exits)
+
+        return random_exit
 
 
 class MovementData:
