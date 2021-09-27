@@ -1,17 +1,18 @@
-RGB	Color_Label	Obj_Label	Space?	Spawnable?	ID_category	Entity_category
-(0,0,0)	black	wall	0	0	100000	Wall
-(0,0,187)	blue	floor_stairs	0	0	110000	Wall
-(0,174,0)	green	toilet	1	1	210000	WalkableFloor
-(0,190,187)	turquoise	door	1	0	220000	WalkableFloor
-(113,113,70)	olive	OOB	0	0	900000	OutOfBounds
-(128,128,128)	grey	short_stairs	1	1	230000	WalkableFloor
-(196,29,225)	purple	desk	0	0	120000	Desk
-(221,0,0)	red	exit	1	0	240000	Exit
-(222,222,6)	yellow	out_stairs	1	0	250000	WalkableFloor
-(225,225,225)	white	floor	1	1	200000	WalkableFloor
-
-# Usage notes:
-# Space = grid spot whether agent can move into. Some stairs are not spawnable. Currently for future
-# Spawnable = grid spot whether agent can spawn into. Doors usually not spawnable. Currently for future
-# ID codes: used for MESA unique_id. 1s are unwalkable, 2s are walkable
-#
+RGB	Color_Label	Obj_Label	ID_category	Entity_category	Spawnable
+(0,0,0)	black	wall	100000	Wall	0
+(33,58,143)	blue	floor_stairs	110000	Obstacle	0
+(39,167,55)	green	toilet	""	NaN	1
+(44,182,182)	turquoise	door	""	NaN	0
+(103,184,114)	olive	OOB	900000	OutOfBounds	0
+(141,136,193)	lilac	exit_west	230000	ExitB	0
+(137,71,149)	purple	desk	310000	HelpDesk	0
+(221,12,21)	red	exit_main	240000	ExitA	0
+(150,150,150)	grey	table	300000	Desk	0
+(255,255,255)	white	floor	""	NaN	1
+(0,255,0)	green	chair		DeskInteractive	1
+(125,42,69)	maroon	exit_east	250000	ExitC	0
+(0,255,255)	cyan	ShelfInteractive		ShelfInteractive	0
+(0,0,255)	deepBlue	Shelf		Shelf	0
+(255,143,178)	pink	OfficeSpot	400000	Office	0
+(255,0,255)	magenta	HelpDeskInteractiveHelper	410000	HelpDeskInteractiveForHelper	0
+(160,0,255)	deepPurple	HelpDeskInteractiveHelpee		HelpDeskInteractiveForHelpee	0

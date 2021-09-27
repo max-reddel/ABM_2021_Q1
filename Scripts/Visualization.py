@@ -1,7 +1,8 @@
 from mesa.visualization.modules import CanvasGrid
 from mesa.visualization.ModularVisualization import ModularServer
-from Scripts.ToyModel import *
-
+# from Scripts.ToyModel import *    # TODO S: temporary switch off
+from Scripts.AnimateAgents import *
+from Scripts.InanimateAgents import *
 
 def show_visualization(model):
     """
