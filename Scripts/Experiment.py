@@ -1,4 +1,5 @@
 from Scripts.Visualization import *
+from Scripts.MappingModel import *
 
 
 def run_simulation(visualize=False, run_length=1000):
@@ -9,10 +10,11 @@ def run_simulation(visualize=False, run_length=1000):
     """
 
     if visualize:
-        show_visualization(ToyModel)
+        show_visualization(MapModel)
 
     else:
-        model = ToyModel()
+        # model = ToyModel()
+        model = MapModel()
         for i in range(run_length):
             model.step()
         print('done')
