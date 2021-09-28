@@ -21,6 +21,9 @@ class Experiment:
         """
         This function runs the entire experiment with all its variations.
         """
+        for x in ExperimentType:
+            self.run_one_simulation(visualize=False, run_length=1000, n_visitors=10, valid_exits=x)
+            # TODO: save data
 
     def run_one_simulation(self, visualize=False, run_length=1000, n_visitors=10, valid_exits=ExperimentType.Any):
         """
