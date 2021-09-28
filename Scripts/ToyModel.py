@@ -1,6 +1,7 @@
 from mesa import Model
 from mesa.time import RandomActivation
 from mesa.space import MultiGrid
+from mesa.datacollection import DataCollector
 
 from Scripts.AnimateAgents import *
 from Scripts.InanimateAgents import *
@@ -17,6 +18,10 @@ class ToyModel(Model):
         super().__init__()
 
         self.id_counter = 0
+        self.n_staff = 0
+        self.n_visitors = n_visitors
+        self.safe_agents = set()
+        self.end_time = 0
 
         self.grid = MultiGrid(width=width, height=height, torus=False)
         self.schedule = RandomActivation(self)
@@ -35,6 +40,8 @@ class ToyModel(Model):
         self.spawn_visitors(n=n_visitors)
         self.spawn_staff()
 
+        self.datacollector = DataCollector(model_reporters={"safe_agents": self.get_nr_of_safe_agents})
+
     def next_id(self):
         """
         Returns current id and increments the id_counter such that each agent can have a unique id.
@@ -43,9 +50,19 @@ class ToyModel(Model):
         self.id_counter += 1
         return self.id_counter - 1
 
+    def get_total_evacuation_time(self):
+        return self.end_time
+
+    def get_nr_of_safe_agents(self, dummy):
+        return len(self.safe_agents)
+
     def step(self):
 
+        if len(self.safe_agents) >= self.n_staff + self.n_visitors:
+            self.end_time = self.schedule.time - self.alarm.starting_time
+
         self.schedule.step()
+        self.datacollector.collect(self)
 
     def fill_grid(self):
 
@@ -241,3 +258,4 @@ class ToyModel(Model):
                             self.grid.place_agent(agent=staff, pos=(i, j))
                             self.schedule.add(staff)
                             staff.emergency_knowledge.compute_closest_exit()
+                            self.n_staff += 1

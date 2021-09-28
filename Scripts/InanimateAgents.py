@@ -116,6 +116,7 @@ class Alarm(Agent):
         super().__init__(unique_id, model)
 
         self.is_activated = False
+        self.starting_time = timer
         self.timer = timer
 
         self.model.schedule.add(self)

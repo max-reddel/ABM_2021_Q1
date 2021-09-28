@@ -142,6 +142,7 @@ class CompositeTask:
                 self.model.grid.remove_agent(self.person)
                 self.model.schedule.remove(self.person)
                 self.person.emergency_knowledge.left = True
+                self.model.safe_agents.add(self.person)
 
             # if current subtask should still run
             elif not self.remaining_subtasks[0].is_done():
