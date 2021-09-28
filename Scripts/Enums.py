@@ -14,6 +14,9 @@ class Destination(Enum):
     DESK = 1
     SHELF = 2
     HELPDESK = 3
+    EXITA = 4
+    EXITB = 5
+    EXITC = 6
 
 
 class Gender(Enum):
@@ -41,3 +44,9 @@ class StaffTasks(Enum):
     PROVIDE_HELP = 1
     WORK_IN_OFFICE = 2
     EVACUATE = 3
+
+
+class Age(Enum):
+
+    CHILD = 0
+    ADULT = 1

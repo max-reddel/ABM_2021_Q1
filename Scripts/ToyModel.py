@@ -13,14 +13,21 @@ class ToyModel(Model):
     This is just a toy model to set up the grid and visualize it.
     """
 
-    def __init__(self, width=20, height=15, n_visitors=10):
+    def __init__(self, width=20, height=15, n_visitors=10, female_ratio=0.5, adult_ratio=0.5, familiarity=0.1,
+                 valid_exits=('Any Exit')):
 
         super().__init__()
 
+        self.female_ratio = female_ratio
+        self.adult_ratio = adult_ratio
+        self.familiarity = familiarity
+
         self.id_counter = 0
+
         self.n_staff = 0
         self.n_visitors = n_visitors
         self.safe_agents = set()
+
         self.end_time = 0
 
         self.grid = MultiGrid(width=width, height=height, torus=False)
@@ -28,6 +35,9 @@ class ToyModel(Model):
         self.destinations = {Destination.DESK: [],
                              Destination.SHELF: [],
                              Destination.EXIT: [],
+                             Destination.EXITA: [],
+                             Destination.EXITB: [],
+                             Destination.EXITC: [],
                              Destination.HELPDESK: []}
 
         self.alarm = Alarm(self.next_id(), self)
@@ -37,7 +47,7 @@ class ToyModel(Model):
         self.fill_grid()
         self.not_spawnable_objects = [Wall, Obstacle, Desk, OutOfBounds, Exit, HelpDesk, Shelf, DeskInteractive,
                                       HelpDeskInteractiveForHelpee, HelpDeskInteractiveForHelper, ShelfInteractive]
-        self.spawn_visitors(n=n_visitors)
+        self.spawn_visitors(n=self.n_visitors)
         self.spawn_staff()
 
         self.datacollector = DataCollector(model_reporters={"safe_agents": self.get_nr_of_safe_agents})
@@ -64,6 +74,19 @@ class ToyModel(Model):
         self.schedule.step()
         self.datacollector.collect(self)
 
+    def add_exit_to_correct_keys(self, exit_agent, pos):
+
+        self.destinations[Destination.EXIT].append(pos)
+
+        if exit_agent == Destination.EXITA:
+            self.destinations[Destination.EXITA].append(pos)
+
+        elif exit_agent == Destination.EXITB:
+            self.destinations[Destination.EXITB].append(pos)
+
+        elif exit_agent == Destination.EXITC:
+            self.destinations[Destination.EXITC].append(pos)
+
     def fill_grid(self):
 
         """Place outer walls"""
@@ -87,29 +110,42 @@ class ToyModel(Model):
 
         # left exit
         pos = (0, 4)
-        self.grid.place_agent(agent=ExitA(self.next_id(), self), pos=pos)
-        self.destinations[Destination.EXIT].append(pos)
+        ex = ExitA(self.next_id(), self)
+        self.grid.place_agent(agent=ex, pos=pos)
+        # self.destinations[Destination.EXIT].append(pos)
+        self.add_exit_to_correct_keys(ex, pos)
+
         pos = (0, 5)
-        self.grid.place_agent(agent=ExitA(self.next_id(), self), pos=pos)
-        self.destinations[Destination.EXIT].append(pos)
+        ex = ExitA(self.next_id(), self)
+        self.grid.place_agent(agent=ex, pos=pos)
+        # self.destinations[Destination.EXIT].append(pos)
+        self.add_exit_to_correct_keys(ex, pos)
 
         # right exit
         pos = (self.grid.width - 1, 12)
-        self.grid.place_agent(agent=ExitB(self.next_id(), self), pos=pos)
-        self.destinations[Destination.EXIT].append(pos)
+        ex = ExitB(self.next_id(), self)
+        self.grid.place_agent(agent=ex, pos=pos)
+        # self.destinations[Destination.EXIT].append(pos)
+        self.add_exit_to_correct_keys(ex, pos)
 
         pos = (self.grid.width - 1, 13)
-        self.grid.place_agent(agent=ExitB(self.next_id(), self), pos=pos)
-        self.destinations[Destination.EXIT].append(pos)
+        ex = ExitB(self.next_id(), self)
+        self.grid.place_agent(agent=ex, pos=pos)
+        # self.destinations[Destination.EXIT].append(pos)
+        self.add_exit_to_correct_keys(ex, pos)
 
         # lower exit
         pos = (16, 0)
-        self.grid.place_agent(agent=ExitC(self.next_id(), self), pos=pos)
-        self.destinations[Destination.EXIT].append(pos)
+        ex = ExitC(self.next_id(), self)
+        self.grid.place_agent(agent=ex, pos=pos)
+        # self.destinations[Destination.EXIT].append(pos)
+        self.add_exit_to_correct_keys(ex, pos)
 
         pos = (17, 0)
-        self.grid.place_agent(agent=ExitC(self.next_id(), self), pos=pos)
-        self.destinations[Destination.EXIT].append(pos)
+        ex = ExitA(self.next_id(), self)
+        self.grid.place_agent(agent=ex, pos=pos)
+        # self.destinations[Destination.EXIT].append(pos)
+        self.add_exit_to_correct_keys(ex, pos)
 
         """Place inner walls"""
 
@@ -233,7 +269,9 @@ class ToyModel(Model):
         """
         spawnable_positions = self.get_all_spawnable_cells()
         for _ in range(n):
-            visitor = Visitor(self.next_id(), self)
+
+            visitor = Visitor(self.next_id(), self, female_ratio=self.female_ratio, adult_ratio=self.adult_ratio,
+                              familiarity=self.familiarity)
 
             pos = random.choice(spawnable_positions)
 
@@ -254,7 +292,7 @@ class ToyModel(Model):
 
                     for n in n_list:
                         if isinstance(n, Office) or isinstance(n, HelpDeskInteractiveForHelper):
-                            staff = Staff(self.next_id(), self)
+                            staff = Staff(self.next_id(), self, female_ratio=self.female_ratio, adult_ratio=self.adult_ratio)
                             self.grid.place_agent(agent=staff, pos=(i, j))
                             self.schedule.add(staff)
                             staff.emergency_knowledge.compute_closest_exit()

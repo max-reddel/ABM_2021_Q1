@@ -9,13 +9,14 @@ from PathFinding import a_star_search
 
 class Person(Agent):
 
-    def __init__(self, unique_id, model, gender=Gender.FEMALE):
+    def __init__(self, unique_id, model, female_ratio=0.5, adult_ratio=0.7):
 
         super().__init__(unique_id, model)
 
-        self.gender = gender
-        self.age = random.randint(13, 100)  # only for potential extension
-        self.busy = False  # interacting with another object (Desk, Shelf, etc.)
+        self.assign_gender(female_ratio)
+        self.assign_age(adult_ratio)
+
+        self.busy = False
 
         self.move_data = MovementData(self.gender)
         self.emergency_knowledge = EmergencyKnowledge(self)
@@ -152,14 +153,28 @@ class Person(Agent):
         else:
             return self.move_data.walking_speed
 
+    def assign_gender(self, female_ratio):
+
+        if random.random() <= female_ratio:
+            self.gender = Gender.FEMALE
+        else:
+            self.gender = Gender.MALE
+
+    def assign_age(self, adult_ratio):
+
+        if random.random() <= adult_ratio:
+            self.age = Age.ADULT
+        else:
+            self.age = Age.CHILD
+
 
 class Visitor(Person):
 
-    def __init__(self, unique_id, model, gender=Gender.FEMALE):
+    def __init__(self, unique_id, model, female_ratio=0.5, adult_ratio=0.7, familiarity=0.1):
 
-        super().__init__(unique_id, model, gender)
+        super().__init__(unique_id, model, female_ratio, adult_ratio)
 
-        self.emergency_knowledge.sample_safety_training(probability=0.1)  # Few visitors had safety training
+        self.emergency_knowledge.sample_safety_training(probability=familiarity)  # Few visitors had safety training
         self.emergency_knowledge.knows_exits = self.emergency_knowledge.get_knows_exits(probability=0.1)
 
     def step(self):
@@ -189,9 +204,9 @@ class Visitor(Person):
 
 class Staff(Person):
 
-    def __init__(self, unique_id, model, gender=Gender.FEMALE):
+    def __init__(self, unique_id, model, female_ratio=0.5, adult_ratio=0.7):
 
-        super().__init__(unique_id, model, gender)
+        super().__init__(unique_id, model, female_ratio, adult_ratio)
 
         self.had_safety_training = True  # All staff had safety training
         self.exit_location = None
