@@ -30,26 +30,26 @@ def show_visualization(model):
             portrayal["w"] = 1
             portrayal["Name"] = 'desk'
 
-        if isinstance(agent, DeskInteractive):
-            portrayal["Shape"] = "rect"
-            portrayal["Color"] = "orange"
-            portrayal["h"] = 1
-            portrayal["w"] = 1
-            portrayal["Name"] = 'chair'
-
-        if isinstance(agent, ShelfInteractive):
-            portrayal["Shape"] = "rect"
-            portrayal["Color"] = "green"
-            portrayal["h"] = 1
-            portrayal["w"] = 1
-            portrayal["Name"] = 'shelf'
-
-        if isinstance(agent, HelpDeskInteractiveForHelpee):
-            portrayal["Shape"] = "rect"
-            portrayal["Color"] = "purple"
-            portrayal["h"] = 1
-            portrayal["w"] = 1
-            portrayal["Name"] = 'help desk'
+        # if isinstance(agent, DeskInteractive):
+        #     portrayal["Shape"] = "rect"
+        #     portrayal["Color"] = "orange"
+        #     portrayal["h"] = 1
+        #     portrayal["w"] = 1
+        #     portrayal["Name"] = 'chair'
+        #
+        # if isinstance(agent, ShelfInteractive):
+        #     portrayal["Shape"] = "rect"
+        #     portrayal["Color"] = "green"
+        #     portrayal["h"] = 1
+        #     portrayal["w"] = 1
+        #     portrayal["Name"] = 'shelf'
+        #
+        # if isinstance(agent, HelpDeskInteractiveForHelpee):
+        #     portrayal["Shape"] = "rect"
+        #     portrayal["Color"] = "purple"
+        #     portrayal["h"] = 1
+        #     portrayal["w"] = 1
+        #     portrayal["Name"] = 'help desk'
 
         if isinstance(agent, ExitA) or isinstance(agent, ExitB) or isinstance(agent, ExitC):
             portrayal["Shape"] = "rect"
@@ -77,7 +77,7 @@ def show_visualization(model):
             portrayal["Color"] = "blue"
             portrayal["r"] = 1.5
             portrayal["Layer"]: 0
-            portrayal["Name"] = 'staff'
+            portrayal["Name"] = 'alarm'
             if agent.is_activated and agent.model.schedule.time % 2 == 0:
                 portrayal["Color"] = "red"
                 portrayal["r"] = 2

@@ -24,8 +24,7 @@ def get_all_paths(grid):
     return all_paths
 
 
-def a_star_search(grid, origin, destination,
-                  unwalkable_objects_list=None):
+def a_star_search(grid, origin, destination, unwalkable_objects_list=None):
     """
     This function returns the shortest path between pos1 and pos2 on a grid.
     Inspiration from: https://www.redblobgames.com/pathfinding/a-star/implementation.html

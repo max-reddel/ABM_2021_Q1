@@ -1,7 +1,10 @@
+import math
+
 from mesa import Agent
 import random
 from Tasks import CompositeTask
 from Enums import *
+from PathFinding import a_star_search
 
 
 class Person(Agent):
@@ -19,8 +22,7 @@ class Person(Agent):
         self.current_task = CompositeTask(self, self.model)
 
     def step(self):
-
-        self.current_task.do()
+        pass
 
     def get_nr_of_neighbors(self, agent_type, radius=6):
         """
@@ -41,7 +43,7 @@ class Person(Agent):
 
         return nr_of_neighbors
 
-    def scan_environment_for_evacuation(self, agent_type, radius=500):
+    def scan_environment_for_evacuation(self, agent_type, radius=50):
         """
         Check whether there are any specific types of agents around and how many seem to be evacuating.
         :param: radius: int
@@ -58,13 +60,97 @@ class Person(Agent):
         nr_of_neighbors = len(animate_agents)
 
         # Check how many neighbors are evacuating
-        evacuating_neighbors = [x for x in animate_agents if x.emergency_knolwedge.is_evacuating]
+        evacuating_neighbors = [x for x in animate_agents if x.emergency_knowledge.is_evacuating]
 
         if nr_of_neighbors == 0:
             return 0
         else:
             evacuating_ratio = float(len(evacuating_neighbors) / nr_of_neighbors)
             return evacuating_ratio
+
+    def check_alarm(self):
+        if self.model.alarm.is_activated:
+            self.emergency_knowledge.is_evacuating = True
+
+    def is_staff_close_by(self, radius=50):
+        """
+        Return True if at least one staff member is in the proximity with a specific radius. The default radius is 5m.
+        :return: Boolean
+        """
+        if self.get_nr_of_neighbors(agent_type=Staff, radius=radius) > 0:
+            return True
+        else:
+            return False
+
+    def are_visitors_close_by(self, radius=50):
+        """
+        Return True if at least one staff member is in the proximity with a specific radius. The default radius is 5m.
+        :return: Boolean
+        """
+        if self.get_nr_of_neighbors(agent_type=Visitor, radius=radius) > 0:
+            return True
+        else:
+            return False
+
+    def get_closest_exit(self):
+
+        return self.emergency_knowledge.closest_exit
+
+    def get_closest_exit_from_closest_staff_member(self, radius=50):
+
+        closest_exit = None
+
+        # get all neighbors (including inanimate agents
+        all_agents = self.model.grid.get_neighbors(pos=self.pos, moore=True, include_center=False, radius=radius)
+
+        # filter out all inanimate agents
+        staff_neighbors = [x for x in all_agents if isinstance(x, Staff)]
+
+        if staff_neighbors:
+            closest_staff = staff_neighbors[0]
+            closest_exit = closest_staff.get_closest_exit()
+
+        return closest_exit
+
+    def update_exit_information_from_staff(self, radius=50):
+
+        closest_exit = self.get_closest_exit_from_closest_staff_member(radius=radius)
+
+        if closest_exit is not None:
+
+            self.emergency_knowledge.closest_exit = closest_exit
+
+    def set_closest_exit(self, closest_exit):
+
+        self.emergency_knowledge.closest_exit = closest_exit
+
+    def update_exit_information_of_surrounding_visitors(self, radius=50):
+
+        persons = self.get_sourrounding_visitors(radius=radius)
+        own_exit = self.emergency_knowledge.closest_exit
+
+        for person in persons:
+            if not person.emergency_knowledge.informed_by_staff:
+                person.emergency_knowledge.is_evacuating = True
+                person.emergency_knowledge.closest_exit = own_exit
+                person.emergency_knowledge.informed_by_staff = True
+
+    def get_sourrounding_visitors(self, radius=50):
+
+        # get all neighbors (including inanimate agents
+        all_agents = self.model.grid.get_neighbors(pos=self.pos, moore=True, include_center=False, radius=radius)
+
+        # filter out all inanimate agents
+        visitor_neighbors = [x for x in all_agents if isinstance(x, Visitor)]
+
+        return visitor_neighbors
+
+    def get_current_speed(self):
+
+        if self.emergency_knowledge.is_evacuating:
+            return self.move_data.running_speed
+        else:
+            return self.move_data.walking_speed
 
 
 class Visitor(Person):
@@ -78,11 +164,26 @@ class Visitor(Person):
 
     def step(self):
 
-        # self.move_data.update_speed(self)
+        # Adjust speed given how many people are close by
+        self.move_data.update_speed(self)
 
-        # Super simple version of knowing about the alarm
-        if self.model.alarm.is_activated:
-            self.emergency_knowledge.is_evacuating = True
+        if self.model.alarm.is_activated and \
+                not self.emergency_knowledge.informed_by_staff and \
+                self.emergency_knowledge.stopping_time > 0 and \
+                not self.emergency_knowledge.had_safety_training:
+            self.emergency_knowledge.stopping_time -= 1
+
+        else:
+
+            # Leave immediately when e.g. staff told visitor to leave if you had safety training
+            if self.model.alarm.is_activated:
+                self.emergency_knowledge.alarm_timer += 1
+
+            # Check whether other persons in proximity are evacuating
+            evacuating_ratio = self.scan_environment_for_evacuation(agent_type=Visitor, radius=50)
+            if evacuating_ratio >= 0.5 or self.emergency_knowledge.should_leave():
+                self.emergency_knowledge.is_evacuating = True
+
         self.current_task.do()
 
 
@@ -93,7 +194,16 @@ class Staff(Person):
         super().__init__(unique_id, model, gender)
 
         self.had_safety_training = True  # All staff had safety training
-        self.knows_exits = True
+        self.exit_location = None
+
+    def step(self):
+
+        self.move_data.update_speed(self)
+
+        # Super simple version of knowing about the alarm
+        if self.model.alarm.is_activated:
+            self.emergency_knowledge.is_evacuating = True
+        self.current_task.do()
 
 
 class EmergencyKnowledge:
@@ -102,13 +212,17 @@ class EmergencyKnowledge:
 
         self.person = person
         self.had_safety_training = False
-        self.knows_exits = False
         self.exit_time = None
         self.exit_location = None
         self.entered_via = self.sample_entrance()  # from which entrance/exit they entered the building
+        self.closest_exit = self.entered_via
         self.heard_alarm = False
+        self.alarm_timer = 0
+        self.alarm_timer_max = 30  # Maximum number of seconds before latest starting to leave the building
+        self.stopping_time = 0
         self.is_evacuating = False
         self.left = False
+        self.informed_by_staff = False
 
     def sample_safety_training(self, probability=0.1):
         """
@@ -136,6 +250,26 @@ class EmergencyKnowledge:
                 knows_exits = True
         return knows_exits
 
+    def compute_closest_exit(self):
+        """
+        Return the closest exit.
+        :return: closest_exit: Destination.EXIT
+        """
+
+        all_exits = self.person.model.destinations[Destination.EXIT]
+        # print(f'all_exits: {all_exits}')
+        grid = self.person.model.grid
+        origin = self.person.pos
+
+        path_lengths = [len(a_star_search(grid, origin, x)) for x in all_exits]
+
+        # Get index of shortest path
+        idx = path_lengths.index(min(path_lengths))
+
+        closest_exit = all_exits[idx]
+
+        return closest_exit
+
     def sample_entrance(self):
         """
         Samples an entrance/exit for a person.
@@ -145,6 +279,9 @@ class EmergencyKnowledge:
         random_exit = random.choice(exits)
 
         return random_exit
+
+    def should_leave(self):
+        return self.alarm_timer >= self.alarm_timer_max
 
 
 class MovementData:
@@ -156,6 +293,7 @@ class MovementData:
         self.default_walking_speed = self.get_default_speed(Movement.WALKING)
         self.default_running_speed = self.get_default_speed(Movement.RUNNING)
         self.walking_speed = self.default_walking_speed
+        self.running_speed = self.default_running_speed
         self.path_to_current_dest = []  # First element is current position.
 
     def get_default_speed(self, movement):
@@ -165,10 +303,10 @@ class MovementData:
         :return:            float, default speed of the person
         """
         # Specifying speeds
-        male_dict = {Movement.RUNNING: 0.1,  # original 1.5
-                     Movement.WALKING: 0.1}  # original 1.0
-        female_dict = {Movement.RUNNING: 0.1,  # original 1.4
-                       Movement.WALKING: 0.1}  # origional 0.9
+        male_dict = {Movement.RUNNING: 1.5,  # original 1.5
+                     Movement.WALKING: 1.0}  # original 1.0
+        female_dict = {Movement.RUNNING: 1.4,  # original 1.4
+                       Movement.WALKING: 0.9}  # origional 0.9
 
         # Read movement-speed from the right dictionary & return it.
         speed = 0.0  # Heads-up: If gender would be sth else than MALE/FEMALE, speed would always be 0.
@@ -183,11 +321,33 @@ class MovementData:
         This function adjust the speed of an agent depending on how many neighbors an agent has in its 6 dm radius.
         :param person: Person
         """
+
         nr_of_neighbors = person.get_nr_of_neighbors(agent_type=Person, radius=6)
 
         if nr_of_neighbors <= 0:
             self.walking_speed = self.default_walking_speed
+            self.running_speed = self.default_running_speed
         elif nr_of_neighbors >= 8:
-            self.walking_speed = 1
+            self.walking_speed = 1.0
+            self.running_speed = 1.0
         else:
-            self.walking_speed = self.default_walking_speed / nr_of_neighbors
+            self.walking_speed = self.default_walking_speed / float(nr_of_neighbors)
+            self.walking_speed = self.convert_to_suitable_speed_format(self.walking_speed)
+            self.running_speed = self.default_running_speed / float(nr_of_neighbors)
+            self.running_speed = self.convert_to_suitable_speed_format(self.running_speed)
+
+    @staticmethod
+    def convert_to_suitable_speed_format(val):
+        """
+        Takes a float and returns it with one digit after the point, ceiled.
+        E.g.    0.23 --> 0.3
+                1.88 --> 1.9
+        :param val: float
+        :return: float
+        """
+
+        val1 = val * 10
+        val2 = math.ceil(val1)
+        val3 = val2 / 10
+
+        return val3

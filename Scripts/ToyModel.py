@@ -33,6 +33,7 @@ class ToyModel(Model):
         self.not_spawnable_objects = [Wall, Obstacle, Desk, OutOfBounds, Exit, HelpDesk, Shelf, DeskInteractive,
                                       HelpDeskInteractiveForHelpee, HelpDeskInteractiveForHelper, ShelfInteractive]
         self.spawn_visitors(n=n_visitors)
+        self.spawn_staff()
 
     def next_id(self):
         """
@@ -166,24 +167,28 @@ class ToyModel(Model):
         self.grid.place_agent(agent=HelpDeskInteractiveForHelpee(self.next_id(), self), pos=pos)
         self.destinations[Destination.HELPDESK].append(pos)
 
+        # HelpDesk Helper interactive
+        pos = (3, 13)
+        self.grid.place_agent(agent=HelpDeskInteractiveForHelper(self.next_id(), self), pos=pos)
+
         # Place some staff members
         # One that is in the office
         pos = (10, 13)
-        staff1 = Staff(self.next_id(), self)
-        self.grid.place_agent(agent=staff1, pos=pos)
-        self.schedule.add(staff1)
+        office1 = Staff(self.next_id(), self)
+        self.grid.place_agent(agent=office1, pos=pos)
+        self.schedule.add(office1)
 
         # One that is at the help desk
         pos = (3, 13)
-        staff2 = Staff(self.next_id(), self)
-        self.grid.place_agent(agent=staff2, pos=pos)
-        self.schedule.add(staff2)
+        office2 = Staff(self.next_id(), self)
+        self.grid.place_agent(agent=office2, pos=pos)
+        self.schedule.add(office2)
 
         # One that is at the help desk
         pos = (8, 8)
-        staff3 = Staff(self.next_id(), self)
-        self.grid.place_agent(agent=staff3, pos=pos)
-        self.schedule.add(staff3)
+        office3 = Staff(self.next_id(), self)
+        self.grid.place_agent(agent=office3, pos=pos)
+        self.schedule.add(office3)
 
     def get_all_spawnable_cells(self):
         """
@@ -217,3 +222,22 @@ class ToyModel(Model):
 
             self.grid.place_agent(agent=visitor, pos=pos)
             self.schedule.add(visitor)
+
+    def spawn_staff(self):
+        """
+        Place staff at all office and help desk interactive helper points.
+        :return:
+        """
+
+        for i in range(self.grid.width):
+            for j in range(self.grid.height):
+                n_list = self.grid.get_cell_list_contents([(i, j)])
+
+                if len(n_list) > 0:
+
+                    for n in n_list:
+                        if isinstance(n, Office) or isinstance(n, HelpDeskInteractiveForHelper):
+                            staff = Staff(self.next_id(), self)
+                            self.grid.place_agent(agent=staff, pos=(i, j))
+                            self.schedule.add(staff)
+                            staff.emergency_knowledge.compute_closest_exit()

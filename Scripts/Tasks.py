@@ -74,12 +74,15 @@ class CompositeTask:
 
         if random_task == VisitorTasks.STUDY:
             remaining_subtasks = [Walk(self.person, self.destinations, Destination.DESK), Stay(self.person)]
+            self.person.emergency_knowledge.stopping_time = VisitorTasks.STUDY.value
 
         elif random_task == VisitorTasks.GET_BOOK:
             remaining_subtasks = [Walk(self.person, self.destinations, Destination.SHELF), Stay(self.person)]
+            self.person.emergency_knowledge.stopping_time = VisitorTasks.GET_BOOK.value
 
         elif random_task == VisitorTasks.GET_HELP:
             remaining_subtasks = [Walk(self.person, self.destinations, Destination.HELPDESK), Stay(self.person)]
+            self.person.emergency_knowledge.stopping_time = VisitorTasks.GET_HELP.value
 
         return remaining_subtasks
 
@@ -108,6 +111,7 @@ class CompositeTask:
 
     def do(self):
 
+        # In normal situation
         if not self.person.emergency_knowledge.is_evacuating:
 
             # If all tasks are done
@@ -116,39 +120,46 @@ class CompositeTask:
 
             # if current subtask should still run
             elif not self.remaining_subtasks[0].is_done():
+                self.do_current_sub_task()
 
-                current_subtask = self.remaining_subtasks[0]
-                current_subtask.do()
-                current_subtask.update()
-
-                # remove finished subtask from remaining substasks
-                if current_subtask.is_done():
-                    self.remaining_subtasks = self.remaining_subtasks[1:]
-
+        # In emergency situation
         else:
+
             if not self.person.emergency_knowledge.left:
+                # Old version of evacuating
+                # exit_destination = self.person.emergency_knowledge.entered_via
+                # self.remaining_subtasks = [Walk(self.person, self.destinations, destination=exit_destination)]
 
-                exit_destination = self.person.emergency_knowledge.entered_via
-                self.remaining_subtasks = [Walk(self.person, self.destinations, destination=exit_destination)]
+                # new version of evacuating
+                if self.person.__class__.__name__ == "Visitor":
+                    self.remaining_subtasks = [VisitorEvacuation(self.person)]
+                elif self.person.__class__.__name__ == "Staff":
+                    self.remaining_subtasks = [StaffEvacuation(self.person)]
 
-            # Interrupt immediately
-            # If already evacuated
-            if not self.remaining_subtasks:
+            # If already in exit posiiton, remove from model
+            if self.person.pos == self.person.emergency_knowledge.closest_exit:
 
-                self.model.schedule.remove(self.person)
                 self.model.grid.remove_agent(self.person)
+                self.model.schedule.remove(self.person)
                 self.person.emergency_knowledge.left = True
 
-                # if current subtask should still run
+            # if current subtask should still run
             elif not self.remaining_subtasks[0].is_done():
 
-                current_subtask = self.remaining_subtasks[0]
-                current_subtask.do()
-                current_subtask.update()
+                self.do_current_sub_task()
 
-                # remove finished subtask from remaining substasks
-                if current_subtask.is_done():
-                    self.remaining_subtasks = self.remaining_subtasks[1:]
+    def do_current_sub_task(self):
+        """
+        Execute the current subtask for the current tick and update all correpsonding datastructures.
+        """
+
+        current_subtask = self.remaining_subtasks[0]
+        current_subtask.do()
+        current_subtask.update()
+
+        # remove finished subtask from remaining substasks
+        if current_subtask.is_done():
+            self.remaining_subtasks = self.remaining_subtasks[1:]
 
 
 class BasicTask:
@@ -199,7 +210,9 @@ class Walk(BasicTask):
         self.person.move_data.path_to_current_dest = a_star_search(self.person.model.grid, self.person.pos, self.destination)
 
         # Calculate how many cells you can travel
-        stride_length = int(self.person.move_data.walking_speed * 10)
+        # stride_length = int(self.person.move_data.walking_speed * 10)
+        stride_length = int(self.person.get_current_speed() * 10)
+
 
         try:
             # Find cell you should move to
@@ -272,3 +285,63 @@ class Stay(BasicTask):
         Stay.
         """
         self.busy = True
+
+
+class EvacuationTask:
+
+    def __init__(self, person):
+
+        self.person = person
+        self.type = None
+        self.busy = False
+
+    def do(self):
+        pass
+
+    def is_done(self):
+        """
+        Returns True if the person reached the final destination.
+        :return: boolean
+        """
+
+        return self.person.pos == self.person.emergency_knowledge.closest_exit
+
+    def update(self):
+        pass
+
+
+class VisitorEvacuation(EvacuationTask):
+
+    def __init__(self, person):
+
+        super().__init__(person)
+        self.destinations = self.person.model.destinations
+
+    def do(self):
+
+        exit_destination = self.person.emergency_knowledge.closest_exit
+        walk = Walk(self.person, self.destinations, destination=exit_destination)
+        walk.do()
+
+
+class StaffEvacuation(EvacuationTask):
+
+    def __init__(self, person):
+
+        super().__init__(person)
+        self.destinations = self.person.model.destinations
+
+    def do(self):
+
+        # Inform surrounding visitors about the closest exit
+        self.person.update_exit_information_of_surrounding_visitors(radius=5)
+
+        # Wait for visitors to leave the area
+        if self.person.are_visitors_close_by(radius=5):
+            stay = Stay(self.person)
+            stay.do()
+        else:
+            # Go to exit
+            exit_destination = self.person.emergency_knowledge.closest_exit
+            walk = Walk(self.person, self.destinations, destination=exit_destination)
+            walk.do()
