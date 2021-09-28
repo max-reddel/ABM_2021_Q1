@@ -1,5 +1,5 @@
 from Scripts.Visualization import *
-
+from Enums import *
 
 class Experiment:
 
@@ -7,30 +7,28 @@ class Experiment:
 
         self.data_dict = {}
 
-        self.data_dict['Only Closest Exit'] = []
+        self.data_dict[ExperimentType.OnlyA] = []
+        self.data_dict[ExperimentType.OnlyB] = []
+        self.data_dict[ExperimentType.OnlyC] = []
 
-        self.data_dict['Only ExitA'] = []
-        self.data_dict['Only ExitB'] = []
-        self.data_dict['Only ExitC'] = []
+        self.data_dict[ExperimentType.A_or_B] = []
+        self.data_dict[ExperimentType.B_or_C] = []
+        self.data_dict[ExperimentType.A_or_C] = []
 
-        self.data_dict['ExitA or ExitB'] = []
-        self.data_dict['ExitB or ExitC'] = []
-        self.data_dict['ExitA or ExitC'] = []
-
-        self.data_dict['Any Exit'] = []
+        self.data_dict[ExperimentType.Any] = []
 
     def run(self):
         """
         This function runs the entire experiment with all its variations.
         """
 
-    def run_one_simulation(self, visualize=False, run_length=1000, n_visitors=10, valid_exits=('Any Exit')):
+    def run_one_simulation(self, visualize=False, run_length=1000, n_visitors=10, valid_exits=ExperimentType.Any):
         """
         Runs one simulation, either with a visualization or without.
         :param visualize: Boolean
         :param run_length: int
         :param n_visitors: int
-        :param valid_exits: tuple of strings containing one or more keys of the data_dict
+        :param valid_exits: string containing one ore key of the data_dict
         """
 
         if visualize:

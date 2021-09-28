@@ -50,3 +50,13 @@ class Age(Enum):
 
     CHILD = 0
     ADULT = 1
+
+
+class ExperimentType(Enum):
+    OnlyA = 0
+    OnlyB = 1
+    OnlyC = 2
+    A_or_B = 3
+    B_or_C = 4
+    A_or_C = 5
+    Any = 6

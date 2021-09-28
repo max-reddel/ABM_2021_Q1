@@ -14,13 +14,14 @@ class ToyModel(Model):
     """
 
     def __init__(self, width=20, height=15, n_visitors=10, female_ratio=0.5, adult_ratio=0.5, familiarity=0.1,
-                 valid_exits=('Any Exit')):
+                 valid_exits=ExperimentType.Any):
 
         super().__init__()
 
         self.female_ratio = female_ratio
         self.adult_ratio = adult_ratio
         self.familiarity = familiarity
+        self.valid_exits = valid_exits
 
         self.id_counter = 0
 
@@ -45,6 +46,8 @@ class ToyModel(Model):
 
         # Create and add agents to the grid and schedule
         self.fill_grid()
+        self.set_up_exits()
+
         self.not_spawnable_objects = [Wall, Obstacle, Desk, OutOfBounds, Exit, HelpDesk, Shelf, DeskInteractive,
                                       HelpDeskInteractiveForHelpee, HelpDeskInteractiveForHelper, ShelfInteractive]
         self.spawn_visitors(n=self.n_visitors)
@@ -59,6 +62,24 @@ class ToyModel(Model):
         """
         self.id_counter += 1
         return self.id_counter - 1
+
+    def set_up_exits(self):
+
+        if self.valid_exits == ExperimentType.Any:
+            pass
+        elif self.valid_exits == ExperimentType.OnlyA:
+            self.destinations[Destination.EXIT] = self.destinations[Destination.EXITA]
+        elif self.valid_exits == ExperimentType.OnlyB:
+            self.destinations[Destination.EXIT] = self.destinations[Destination.EXITB]
+        elif self.valid_exits == ExperimentType.OnlyC:
+            self.destinations[Destination.EXIT] = self.destinations[Destination.EXITC]
+        elif self.valid_exits == ExperimentType.A_or_B:
+            self.destinations[Destination.EXIT] = self.destinations[Destination.EXITA] + self.destinations[Destination.EXITB]
+        elif self.valid_exits == ExperimentType.B_or_C:
+            self.destinations[Destination.EXIT] = self.destinations[Destination.EXITB] + self.destinations[Destination.EXITC]
+        elif self.valid_exits == ExperimentType.A_or_C:
+            self.destinations[Destination.EXIT] = self.destinations[Destination.EXITA] + self.destinations[Destination.EXITC]
+
 
     def get_total_evacuation_time(self):
         return self.end_time
@@ -78,13 +99,13 @@ class ToyModel(Model):
 
         self.destinations[Destination.EXIT].append(pos)
 
-        if exit_agent == Destination.EXITA:
+        if isinstance(exit_agent, ExitA):
             self.destinations[Destination.EXITA].append(pos)
 
-        elif exit_agent == Destination.EXITB:
+        elif isinstance(exit_agent, ExitB):
             self.destinations[Destination.EXITB].append(pos)
 
-        elif exit_agent == Destination.EXITC:
+        elif isinstance(exit_agent, ExitC):
             self.destinations[Destination.EXITC].append(pos)
 
     def fill_grid(self):
