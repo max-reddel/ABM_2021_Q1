@@ -52,11 +52,11 @@ class Age(Enum):
     ADULT = 1
 
 
-class ExperimentType(Enum):
-    OnlyA = 0
-    OnlyB = 1
-    OnlyC = 2
-    A_or_B = 3
-    B_or_C = 4
-    A_or_C = 5
-    Any = 6
+class ExitType(Enum):
+    A = 0
+    B = 1
+    C = 2
+    AB = 3
+    BC = 4
+    AC = 5
+    ABC = 6

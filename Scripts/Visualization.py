@@ -1,4 +1,4 @@
-from mesa.visualization.modules import CanvasGrid
+from mesa.visualization.modules import CanvasGrid, ChartModule
 from mesa.visualization.ModularVisualization import ModularServer
 from Scripts.ToyModel import *
 
@@ -93,8 +93,10 @@ def show_visualization(model):
 
     canvas = CanvasGrid(agent_portrayal, width, height, size * width, size * height)
 
+    chart = ChartModule([{"Label": "safe_agents", "Color": "blue"}], data_collector_name="datacollector")
+
     server = ModularServer(model,
-                           [canvas],
+                           [canvas, chart],
                            "Evacuation Model",
                            {"width": width, "height": height})
 

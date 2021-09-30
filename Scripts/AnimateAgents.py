@@ -234,7 +234,7 @@ class EmergencyKnowledge:
         self.heard_alarm = False
         self.alarm_timer = 0
         self.alarm_timer_max = 30  # Maximum number of seconds before latest starting to leave the building
-        self.stopping_time = 0
+        self.stopping_time = 0  # Time to stop a current task in emergency situation
         self.is_evacuating = False
         self.left = False
         self.informed_by_staff = False
@@ -272,7 +272,6 @@ class EmergencyKnowledge:
         """
 
         all_exits = self.person.model.destinations[Destination.EXIT]
-        # print(f'all_exits: {all_exits}')
         grid = self.person.model.grid
         origin = self.person.pos
 
@@ -322,9 +321,13 @@ class MovementData:
                      Movement.WALKING: 1.0}  # original 1.0
         female_dict = {Movement.RUNNING: 1.4,  # original 1.4
                        Movement.WALKING: 0.9}  # origional 0.9
+        # male_dict = {Movement.RUNNING: 0.1,  # original 1.5
+        #              Movement.WALKING: 0.1}  # original 1.0
+        # female_dict = {Movement.RUNNING: 0.1,  # original 1.4
+        #                Movement.WALKING: 0.1}  # origional 0.9
 
         # Read movement-speed from the right dictionary & return it.
-        speed = 0.0  # Heads-up: If gender would be sth else than MALE/FEMALE, speed would always be 0.
+        speed = 1.0  # Heads-up: If gender would be sth else than MALE/FEMALE, speed would always be 1.
         if self.gender == Gender.MALE:
             speed = male_dict[movement]
         elif self.gender == Gender.FEMALE:

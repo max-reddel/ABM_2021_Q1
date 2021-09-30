@@ -14,7 +14,7 @@ class ToyModel(Model):
     """
 
     def __init__(self, width=20, height=15, n_visitors=10, female_ratio=0.5, adult_ratio=0.5, familiarity=0.1,
-                 valid_exits=ExperimentType.Any):
+                 valid_exits=ExitType.ABC):
 
         super().__init__()
 
@@ -29,7 +29,6 @@ class ToyModel(Model):
         self.n_visitors = n_visitors
         self.safe_agents = set()
 
-        self.end_time = 0
 
         self.grid = MultiGrid(width=width, height=height, torus=False)
         self.schedule = RandomActivation(self)
@@ -42,6 +41,9 @@ class ToyModel(Model):
                              Destination.HELPDESK: []}
 
         self.alarm = Alarm(self.next_id(), self)
+
+        self.end_time = - self.alarm.starting_time
+
         self.grid.place_agent(self.alarm, (2, 6))
 
         # Create and add agents to the grid and schedule
@@ -55,6 +57,9 @@ class ToyModel(Model):
 
         self.datacollector = DataCollector(model_reporters={"safe_agents": self.get_nr_of_safe_agents})
 
+    def is_done(self):
+        return len(self.safe_agents) >= self.n_staff + self.n_visitors
+
     def next_id(self):
         """
         Returns current id and increments the id_counter such that each agent can have a unique id.
@@ -65,33 +70,30 @@ class ToyModel(Model):
 
     def set_up_exits(self):
 
-        if self.valid_exits == ExperimentType.Any:
+        if self.valid_exits == ExitType.ABC:
             pass
-        elif self.valid_exits == ExperimentType.OnlyA:
+        elif self.valid_exits == ExitType.A:
             self.destinations[Destination.EXIT] = self.destinations[Destination.EXITA]
-        elif self.valid_exits == ExperimentType.OnlyB:
+        elif self.valid_exits == ExitType.B:
             self.destinations[Destination.EXIT] = self.destinations[Destination.EXITB]
-        elif self.valid_exits == ExperimentType.OnlyC:
+        elif self.valid_exits == ExitType.C:
             self.destinations[Destination.EXIT] = self.destinations[Destination.EXITC]
-        elif self.valid_exits == ExperimentType.A_or_B:
+        elif self.valid_exits == ExitType.AB:
             self.destinations[Destination.EXIT] = self.destinations[Destination.EXITA] + self.destinations[Destination.EXITB]
-        elif self.valid_exits == ExperimentType.B_or_C:
+        elif self.valid_exits == ExitType.BC:
             self.destinations[Destination.EXIT] = self.destinations[Destination.EXITB] + self.destinations[Destination.EXITC]
-        elif self.valid_exits == ExperimentType.A_or_C:
+        elif self.valid_exits == ExitType.AC:
             self.destinations[Destination.EXIT] = self.destinations[Destination.EXITA] + self.destinations[Destination.EXITC]
-
 
     def get_total_evacuation_time(self):
         return self.end_time
 
-    def get_nr_of_safe_agents(self, dummy):
+    def get_nr_of_safe_agents(self, dummy=1):
         return len(self.safe_agents)
 
     def step(self):
 
-        if len(self.safe_agents) >= self.n_staff + self.n_visitors:
-            self.end_time = self.schedule.time - self.alarm.starting_time
-
+        self.end_time += 1
         self.schedule.step()
         self.datacollector.collect(self)
 
