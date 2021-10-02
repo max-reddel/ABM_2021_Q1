@@ -26,8 +26,8 @@ class MapModel(Model):
     (Requires external txt file detailing the colours to agents)
     """
 
-    def __init__(self, img_path='../Images/Library_NewPlan2_map.png',
-                 color_path='../Images/object_colours.tsv', n_vistors=50):
+    def __init__(self, img_path='Images/Library_NewPlan2_map.png',
+                 color_path='Images/object_colours.tsv', n_vistors=50):
         super().__init__()
         self.id_counter = 0
         self.destinations = {Destination.DESK:[],
