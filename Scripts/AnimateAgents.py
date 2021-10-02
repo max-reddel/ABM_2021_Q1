@@ -13,7 +13,10 @@ class Person(Agent):
 
         super().__init__(unique_id, model)
 
+        self.gender = Gender.FEMALE
         self.assign_gender(female_ratio)
+
+        self.age = Age.ADULT
         self.assign_age(adult_ratio)
 
         self.busy = False
@@ -94,10 +97,19 @@ class Person(Agent):
             return False
 
     def get_closest_exit(self):
+        """
+        Return position of closest exit
+        :return: pos: tuple
+        """
 
         return self.emergency_knowledge.closest_exit
 
     def get_closest_exit_from_closest_staff_member(self, radius=50):
+        """
+        Return position of closest exit from the closest staff member
+        :param radius: int
+        :return: closest_exit: tuple
+        """
 
         closest_exit = None
 
@@ -114,6 +126,10 @@ class Person(Agent):
         return closest_exit
 
     def update_exit_information_from_staff(self, radius=50):
+        """
+        Update own exit information given the the closest exit from the closest staff member.
+        :param radius: int
+        """
 
         closest_exit = self.get_closest_exit_from_closest_staff_member(radius=radius)
 
@@ -122,10 +138,19 @@ class Person(Agent):
             self.emergency_knowledge.closest_exit = closest_exit
 
     def set_closest_exit(self, closest_exit):
+        """
+        Set own closest exit
+        :param closest_exit: pos tuple
+        """
 
         self.emergency_knowledge.closest_exit = closest_exit
 
     def update_exit_information_of_surrounding_visitors(self, radius=50):
+        """
+        Scan for visitors close by and update their closest_exit with your own (if they have not been informed by
+        staff yet).
+        :param radius: int
+        """
 
         persons = self.get_sourrounding_visitors(radius=radius)
         own_exit = self.emergency_knowledge.closest_exit
@@ -137,6 +162,11 @@ class Person(Agent):
                 person.emergency_knowledge.informed_by_staff = True
 
     def get_sourrounding_visitors(self, radius=50):
+        """
+        Get a list of close by visitors
+        :param radius: int
+        :return visitor_neighbors: list
+        """
 
         # get all neighbors (including inanimate agents
         all_agents = self.model.grid.get_neighbors(pos=self.pos, moore=True, include_center=False, radius=radius)
@@ -147,6 +177,10 @@ class Person(Agent):
         return visitor_neighbors
 
     def get_current_speed(self):
+        """
+        Return current speed depending on whether or not this agent is evacuating.
+        :return: float
+        """
 
         if self.emergency_knowledge.is_evacuating:
             return self.move_data.running_speed
@@ -154,6 +188,10 @@ class Person(Agent):
             return self.move_data.walking_speed
 
     def assign_gender(self, female_ratio):
+        """
+        Set gender of this agent given some probability.
+        :param female_ratio: float
+        """
 
         if random.random() <= female_ratio:
             self.gender = Gender.FEMALE
@@ -161,6 +199,10 @@ class Person(Agent):
             self.gender = Gender.MALE
 
     def assign_age(self, adult_ratio):
+        """
+        Set age of this agent given some probability.
+        :param adult_ratio: float
+        """
 
         if random.random() <= adult_ratio:
             self.age = Age.ADULT

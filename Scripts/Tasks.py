@@ -214,7 +214,6 @@ class Walk(BasicTask):
         # stride_length = int(self.person.move_data.walking_speed * 10)
         stride_length = int(self.person.get_current_speed() * 10)
 
-
         try:
             # Find cell you should move to
             new_pos = self.person.move_data.path_to_current_dest[stride_length]
