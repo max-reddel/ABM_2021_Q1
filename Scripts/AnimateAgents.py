@@ -388,8 +388,8 @@ class MovementData:
             self.walking_speed = self.default_walking_speed
             self.running_speed = self.default_running_speed
         elif nr_of_neighbors >= 8:
-            self.walking_speed = 1.0
-            self.running_speed = 1.0
+            self.walking_speed = 0.1
+            self.running_speed = 0.1
         else:
             self.walking_speed = self.default_walking_speed / float(nr_of_neighbors)
             self.walking_speed = self.convert_to_suitable_speed_format(self.walking_speed)

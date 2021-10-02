@@ -1,5 +1,3 @@
-import matplotlib.pyplot as plt
-
 from Scripts.Visualization import *
 from Enums import *
 import seaborn as sns
