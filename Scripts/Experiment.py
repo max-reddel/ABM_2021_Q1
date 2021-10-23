@@ -67,6 +67,8 @@ class Experiment:
                                                  female_ratio=female_ratio, adult_ratio=adult_ratio, familiarity=familiarity,
                                                  valid_exits=valid_exits, model=self.model, map_img_path=self.map_path)
 
+            if visualize:
+                break
             total_evacuation_times_per_replication.append(evac_time)
             print(f'\t\treplication #{i+1}/{n_replications}')
 
