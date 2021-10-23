@@ -4,6 +4,7 @@ from Scripts.MappingModel import *
 from Enums import *
 import seaborn as sns
 import pandas as pd
+import time
 
 
 class Experiment:
@@ -11,6 +12,7 @@ class Experiment:
     def __init__(self):
 
         print('Setting up the experiment ...\n')
+        self.start_time = time.time()
 
         # Evacuation times per exit type (including all single evacuation times for each replication)
         self.evacuation_times = {ExitType.A: [], ExitType.B: [], ExitType.C: [], ExitType.AB: [],
@@ -21,7 +23,7 @@ class Experiment:
                                          ExitType.BC: 0, ExitType.AC: 0, ExitType.ABC: 0}
 
     def run(self, model, n_replications=10, visualize=False, max_run_length=1000, n_visitors=10, female_ratio=0.5,
-            adult_ratio=0.5, familiarity=0.1,map_img_path=None):
+            adult_ratio=0.5, familiarity=0.1, map_img_path=None):
         """
         This function runs the entire experiment with all its variations.
         """
@@ -42,6 +44,9 @@ class Experiment:
 
             if visualize:
                 break
+
+        run_time = round(time.time() - self.start_time, 2)
+        print(f'Run time: {run_time} seconds')
 
     def run_n_replications(self, n_replications=10, visualize=False, max_run_length=1000, n_visitors=10, female_ratio=0.5,
                            adult_ratio=0.5, familiarity=0.1, valid_exits=ExitType.ABC):
