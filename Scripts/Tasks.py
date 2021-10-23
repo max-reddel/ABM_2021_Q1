@@ -208,8 +208,18 @@ class Walk(BasicTask):
         """
         # self.person.move_data.path_to_current_dest = a_star_search(self.person.model.grid, self.person.pos, self.destination)
         if self.person.move_data.path_to_current_dest is None or len(self.person.move_data.path_to_current_dest) <= 1:
-            self.person.move_data.path_to_current_dest = a_star_search(self.person.model.grid, self.person.pos, self.destination)
-            # print(f'current path:\n{self.person.move_data.path_to_current_dest}\n')
+
+            origin = self.person.pos
+            destination = self.destination
+
+            if (origin, destination) in self.person.model.all_paths:
+                self.person.move_data.path_to_current_dest = self.person.model.all_paths[(origin, destination)]
+            else:
+                self.person.move_data.path_to_current_dest = a_star_search(self.person.model.grid, self.person.pos, self.destination)
+
+            # Save path (for speeding up calculations)
+
+            self.person.model.all_paths[(origin, destination)] = self.person.move_data.path_to_current_dest
 
         # Calculate how many cells you can travel
         stride_length = int(self.person.get_current_speed() * 10)

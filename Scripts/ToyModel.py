@@ -29,7 +29,6 @@ class ToyModel(Model):
         self.n_visitors = n_visitors
         self.safe_agents = set()
 
-
         self.grid = MultiGrid(width=width, height=height, torus=False)
         self.schedule = RandomActivation(self)
         self.destinations = {Destination.DESK: [],
@@ -54,6 +53,9 @@ class ToyModel(Model):
                                       HelpDeskInteractiveForHelpee, HelpDeskInteractiveForHelper, ShelfInteractive]
         self.spawn_visitors(n=self.n_visitors)
         self.spawn_staff()
+
+        # Saving calculated paths in dict key=(start pos, end pos), value=path
+        self.all_paths = {}
 
         self.datacollector = DataCollector(model_reporters={"safe_agents": self.get_nr_of_safe_agents})
 
