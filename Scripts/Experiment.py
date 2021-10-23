@@ -20,10 +20,8 @@ class Experiment:
         self.average_evacuation_times = {ExitType.A: 0, ExitType.B: 0, ExitType.C: 0, ExitType.AB: 0,
                                          ExitType.BC: 0, ExitType.AC: 0, ExitType.ABC: 0}
 
-
-
-    def run(self, model, n_replications=10, visualize=False, max_run_length=1000, n_visitors=10, female_ratio=0.5, adult_ratio=0.5,
-            familiarity=0.1,map_img_path=None):
+    def run(self, model, n_replications=10, visualize=False, max_run_length=1000, n_visitors=10, female_ratio=0.5,
+            adult_ratio=0.5, familiarity=0.1,map_img_path=None):
         """
         This function runs the entire experiment with all its variations.
         """
@@ -33,13 +31,17 @@ class Experiment:
         print(f"\nSet Map object currently {self.map_path}.")
 
         for ex in ExitType:
-            print(f"\nRunning replications for exit type: {ex}")
+            message = f"\nRunning replications for exit type: {ex}" if not visualize else "\nRunning visualization."
+            print(f"{message}")
             self.evacuation_times[ex] = self.run_n_replications(n_replications=n_replications, visualize=visualize,
                                                                 max_run_length=max_run_length, n_visitors=n_visitors,
                                                                 female_ratio=female_ratio, adult_ratio=adult_ratio,
                                                                 familiarity=familiarity, valid_exits=ex)
 
             self.average_evacuation_times[ex] = sum(self.evacuation_times[ex]) / len(self.evacuation_times[ex])
+
+            if visualize:
+                break
 
     def run_n_replications(self, n_replications=10, visualize=False, max_run_length=1000, n_visitors=10, female_ratio=0.5,
                            adult_ratio=0.5, familiarity=0.1, valid_exits=ExitType.ABC):
@@ -57,7 +59,8 @@ class Experiment:
         :return: total_evacuation_times_per_replication: list
         """
         total_evacuation_times_per_replication = []
-        print(f'\tRunning {n_replications} replications:')
+        message = f'\tRunning {n_replications} replications:' if not visualize else ""
+        print(message)
         for i in range(n_replications):
 
             evac_time = self.run_one_replication(visualize=visualize, max_run_length=max_run_length, n_visitors=n_visitors,
@@ -87,7 +90,7 @@ class Experiment:
 
         if visualize:
             # show_visualization(MapModel)
-            show_visualization(model,map_img_path)
+            show_visualization(model, map_img_path)
 
         else:
 
