@@ -243,7 +243,6 @@ class Visitor(Person):
 
         self.current_task.do()
 
-
 class Staff(Person):
 
     def __init__(self, unique_id, model, female_ratio=0.5, adult_ratio=0.7):
@@ -255,13 +254,13 @@ class Staff(Person):
 
     def step(self):
 
+
         self.move_data.update_speed(self)
 
         # Super simple version of knowing about the alarm
         if self.model.alarm.is_activated:
             self.emergency_knowledge.is_evacuating = True
         self.current_task.do()
-
 
 class EmergencyKnowledge:
 

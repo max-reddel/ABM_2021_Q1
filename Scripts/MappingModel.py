@@ -10,6 +10,7 @@ from mesa.datacollection import DataCollector
 import Scripts.InanimateAgents as IA
 from Scripts.AnimateAgents import *
 from Enums import *
+current_img_path = 'Images/Library_ToyPlan2_v1.png'
 
 def nprgb_to_hex(row):
     """
@@ -19,15 +20,26 @@ def nprgb_to_hex(row):
     """
     return str('%02x%02x%02x' % (row[0] ,row[1], row[2]))
 
+def get_border_dims(img_path=current_img_path):
+    """
+    Returns height and width values of an image. Used for creating a canvas before the model call. Hacky.
+    :param img_path: image file path
+    :return: tuple(height,width)
+    """
+    im = np.array(Image.open(img_path))
+    return im.shape[:-1]
+
 class MapModel(Model):
     """
     Instantiates Mesa grid and schedule objects.
     Converts pixels on given map image into Mesa grid entities.
     Populates Mesa grid with visitors and office staff as well.
     (Requires external txt file detailing the colours to agents)
+    img_path='Images/Library_NewPlan2_map.png'
+    img_path='Images/Library_ToyPlan2_v1.png'
     """
 
-    def __init__(self, img_path='Images/Library_NewPlan2_map.png',
+    def __init__(self, img_path=current_img_path,
                  color_path='Images/object_colours.tsv', n_visitors=50, n_officestaff=3, female_ratio=0.5,
                  adult_ratio=0.5, familiarity=0.1, valid_exits=ExitType.ABC):
         super().__init__()
@@ -147,6 +159,7 @@ class MapModel(Model):
         self.schedule.step()
         self.datacollector.collect(self)
 
+        # print(self.end_time)
 
     def set_up_exits(self):
 
@@ -279,12 +292,11 @@ class MapModel(Model):
         :param n: number of visitors to spawn
         :return:
         """
-        for _ in range(n):
+
+        positions = random.sample(self.spawnable_positions,k=n)
+        for pos in positions :
             visitor = Visitor(self.next_id(),self, female_ratio=self.female_ratio,
                               adult_ratio=self.adult_ratio,familiarity=self.familiarity)
-
-            # TODO: no possibility for overlap?
-            pos = random.choice(self.spawnable_positions)
 
             self.grid.place_agent(agent=visitor, pos=pos)
             self.schedule.add(visitor)
@@ -296,7 +308,7 @@ class MapModel(Model):
         :param n:
         :return:
         """
-        positions = random.choices(self.spawnable_positions, k=n)
+        positions = random.sample(self.spawnable_positions, k=n)
         for pos in positions:
             officepax = Staff(self.next_id(), self, female_ratio=self.female_ratio,
                               adult_ratio=self.adult_ratio)

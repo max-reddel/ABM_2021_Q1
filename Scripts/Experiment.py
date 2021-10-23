@@ -20,13 +20,17 @@ class Experiment:
         self.average_evacuation_times = {ExitType.A: 0, ExitType.B: 0, ExitType.C: 0, ExitType.AB: 0,
                                          ExitType.BC: 0, ExitType.AC: 0, ExitType.ABC: 0}
 
-    def run(self, n_replications=10, visualize=False, max_run_length=1000, n_visitors=10, female_ratio=0.5, adult_ratio=0.5,
-            familiarity=0.1, model=ToyModel):
+
+
+    def run(self, model, n_replications=10, visualize=False, max_run_length=1000, n_visitors=10, female_ratio=0.5, adult_ratio=0.5,
+            familiarity=0.1,map_img_path=None):
         """
         This function runs the entire experiment with all its variations.
         """
         self.display_inputs(n_replications, max_run_length, n_visitors, female_ratio, adult_ratio, familiarity)
         self.model = model
+        self.map_path = map_img_path
+        print(f"\nSet Map object currently {self.map_path}.")
 
         for ex in ExitType:
             print(f"\nRunning replications for exit type: {ex}")
@@ -58,7 +62,7 @@ class Experiment:
 
             evac_time = self.run_one_replication(visualize=visualize, max_run_length=max_run_length, n_visitors=n_visitors,
                                                  female_ratio=female_ratio, adult_ratio=adult_ratio, familiarity=familiarity,
-                                                 valid_exits=valid_exits, model=self.model)
+                                                 valid_exits=valid_exits, model=self.model, map_img_path=self.map_path)
 
             total_evacuation_times_per_replication.append(evac_time)
             print(f'\t\treplication #{i+1}/{n_replications}')
@@ -67,7 +71,7 @@ class Experiment:
 
     @staticmethod
     def run_one_replication(visualize=False, max_run_length=1000, n_visitors=10, female_ratio=0.5, adult_ratio=0.5,
-                            familiarity=0.1, valid_exits=ExitType.ABC, model=ToyModel):
+                            familiarity=0.1, valid_exits=ExitType.ABC, model=ToyModel, map_img_path=None):
         """
         Runs one simulation, either with a visualization or without. It returns the evacuation time for this run.
         :param visualize: Boolean
@@ -83,7 +87,7 @@ class Experiment:
 
         if visualize:
             # show_visualization(MapModel)
-            show_visualization(model)
+            show_visualization(model,map_img_path)
 
         else:
 

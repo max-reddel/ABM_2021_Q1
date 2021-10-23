@@ -3,8 +3,9 @@ from mesa.visualization.ModularVisualization import ModularServer
 # from Scripts.ToyModel import *    # TODO S: temporary switch off
 from Scripts.AnimateAgents import *
 from Scripts.InanimateAgents import *
+from Scripts.MappingModel import get_border_dims
 
-def show_visualization(model):
+def show_visualization(model, img_map_path):
     """
     Creates an animation, given a model type (e.g. EvacuationModel)
     """
@@ -87,19 +88,28 @@ def show_visualization(model):
 
         return portrayal
 
-    # Parameters
-    width = 20
-    height = 15
-    size = 20
-
-    canvas = CanvasGrid(agent_portrayal, width, height, size * width, size * height)
-
     chart = ChartModule([{"Label": "safe_agents", "Color": "blue"}], data_collector_name="datacollector")
 
-    server = ModularServer(model,
-                           [canvas, chart],
-                           "Evacuation Model",
-                           {"width": width, "height": height})
+    # Parameters
+
+    if img_map_path is not None:
+        height, width = get_border_dims(img_map_path)
+        px_rep = 2
+        canvas = CanvasGrid(agent_portrayal, width, height, width*px_rep, height*px_rep)
+        server = ModularServer(model,
+                               [canvas, chart],
+                               "Evacuation Model",
+                               {"img_path": img_map_path})
+    else:
+        width = 20
+        height = 15
+        size = 20
+        canvas = CanvasGrid(agent_portrayal, width, height, size * width, size * height)
+        server = ModularServer(model,
+                               [canvas, chart],
+                               "Evacuation Model",
+                               {"width":width, "height":height})
+
 
     server.port = 8521  # The default
     server.launch()
