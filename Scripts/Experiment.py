@@ -1,7 +1,7 @@
 from Scripts.Visualization import *
 from Scripts.ToyModel import *
 from Scripts.MappingModel import *
-from Enums import *
+from Scripts.Enums import *
 import seaborn as sns
 import pandas as pd
 import time
@@ -13,6 +13,8 @@ class Experiment:
 
         print('Setting up the experiment ...\n')
         self.start_time = time.time()
+        self.execution_times = []
+        self.cum_time = [self.start_time]
 
         # Evacuation times per exit type (including all single evacuation times for each replication)
         self.evacuation_times = {ExitType.A: [], ExitType.B: [], ExitType.C: [], ExitType.AB: [],
@@ -79,11 +81,11 @@ class Experiment:
 
         return total_evacuation_times_per_replication
 
-    @staticmethod
-    def run_one_replication(visualize=False, max_run_length=1000, n_visitors=10, female_ratio=0.5, adult_ratio=0.5,
+    def run_one_replication(self, visualize=False, max_run_length=1000, n_visitors=10, female_ratio=0.5, adult_ratio=0.5,
                             familiarity=0.1, valid_exits=ExitType.ABC, model=ToyModel, map_img_path=None):
         """
         Runs one simulation, either with a visualization or without. It returns the evacuation time for this run.
+        :param map_img_path:
         :param visualize: Boolean
         :param max_run_length: int
         :param n_visitors: int
@@ -116,6 +118,11 @@ class Experiment:
 
             # Save data
             evac_time = model.get_total_evacuation_time()
+
+            # Save time
+            run_time = round(time.time() - self.cum_time[-1], 2)
+            self.execution_times.append(run_time)
+            self.cum_time.append(time.time())
             return evac_time
 
     def show_evacuation_time_averages(self):
@@ -174,3 +181,7 @@ class Experiment:
         ts = self.evacuation_times
         for k, v in ts.items():
             print(k, v)
+
+    def show_execution_times(self):
+
+        print(f'Execution times per replication: {self.execution_times}')

@@ -5,7 +5,7 @@ from mesa.datacollection import DataCollector
 
 from Scripts.AnimateAgents import *
 from Scripts.InanimateAgents import *
-from Enums import *
+from Scripts.Enums import *
 
 
 class ToyModel(Model):
@@ -96,6 +96,7 @@ class ToyModel(Model):
         self.end_time += 1
         self.schedule.step()
         self.datacollector.collect(self)
+        # print('step')
 
     def add_exit_to_correct_keys(self, exit_agent, pos):
 

@@ -1,6 +1,6 @@
-from PathFinding import a_star_search
+from Scripts.PathFinding import a_star_search
 import random
-from Enums import *
+from Scripts.Enums import *
 
 
 class CompositeTask:
@@ -205,13 +205,13 @@ class Walk(BasicTask):
         Makes the agent walk. By moving it from its current position, into the direction of their current destination,
         with its speed being adjusted to whether it is an emergency (i.e., adjusted the Movement mode)
         and the amount of people nearby.
-
-        Disclaimer: Currently still basic version. Only walking into right direction.
         """
-        self.person.move_data.path_to_current_dest = a_star_search(self.person.model.grid, self.person.pos, self.destination)
+        # self.person.move_data.path_to_current_dest = a_star_search(self.person.model.grid, self.person.pos, self.destination)
+        if self.person.move_data.path_to_current_dest is None or len(self.person.move_data.path_to_current_dest) <= 1:
+            self.person.move_data.path_to_current_dest = a_star_search(self.person.model.grid, self.person.pos, self.destination)
+            # print(f'current path:\n{self.person.move_data.path_to_current_dest}\n')
 
         # Calculate how many cells you can travel
-        # stride_length = int(self.person.move_data.walking_speed * 10)
         stride_length = int(self.person.get_current_speed() * 10)
 
         try:

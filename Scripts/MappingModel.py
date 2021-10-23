@@ -9,7 +9,7 @@ from mesa.datacollection import DataCollector
 
 import Scripts.InanimateAgents as IA
 from Scripts.AnimateAgents import *
-from Enums import *
+from Scripts.Enums import *
 current_img_path = 'Images/Library_ToyPlan2_v1.png'
 
 def nprgb_to_hex(row):
