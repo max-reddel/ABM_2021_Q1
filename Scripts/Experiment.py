@@ -190,6 +190,13 @@ class Experiment:
         print(f'Execution times per replication: {self.execution_times}')
 
     def save_data_to_pickle(self, folder='./OutputData/', modifier=0):
+        """
+        Saves the data of your current data in two pickles.
+        :param folder:
+        :param modifier:    modifier=1 --> exit types A, B, C
+                            modifier=2 --> exit types AB, BC
+                            modifier=2 --> exit types AC, ABC
+        """
 
         evac_times = self.evacuation_times
         average_evac_times = self.average_evacuation_times
@@ -202,6 +209,15 @@ class Experiment:
 
     @staticmethod
     def load_pickled_data(folder='./OutputData/', modifier='0'):
+        """
+        Loads the data of two pickles and returns them.
+        :param folder:
+        :param modifier:    modifier=1 --> exit types A, B, C
+                            modifier=2 --> exit types AB, BC
+                            modifier=2 --> exit types AC, ABC
+        :return evac_times: dictionary
+                average_evac_times: dictionary
+        """
 
         with open(f'{folder}evac_times_{modifier}.pickle', 'rb') as handle:
             evac_times = pickle.load(handle)
