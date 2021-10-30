@@ -180,7 +180,7 @@ class MapModel(Model):
         self.schedule.step()
         self.datacollector.collect(self)
 
-        print(self.end_time)
+        # print(self.end_time)
 
     def set_up_exits(self):
 
@@ -311,7 +311,7 @@ class MapModel(Model):
                 except TypeError:
                     # Catches TypeError for walkable tiles (since only unwalkables are placed)
                     continue
-        print("\tMappingModel.py: all grid objects transferred to MESA grid entities.")
+        # print("\tMappingModel.py: all grid objects transferred to MESA grid entities.")
 
     def spawn_visitors(self, n):
         """

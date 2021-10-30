@@ -1,10 +1,10 @@
 from Scripts.Visualization import *
 from Scripts.ToyModel import *
-from Scripts.MappingModel import *
 from Scripts.Enums import *
 import seaborn as sns
 import pandas as pd
 import time
+import pickle
 
 
 class Experiment:
@@ -25,7 +25,7 @@ class Experiment:
                                          ExitType.BC: 0, ExitType.AC: 0, ExitType.ABC: 0}
 
     def run(self, model, n_replications=10, visualize=False, max_run_length=1000, n_visitors=10, female_ratio=0.5,
-            adult_ratio=0.5, familiarity=0.1, map_img_path=None):
+            adult_ratio=0.5, familiarity=0.1, map_img_path=None, valid_exits=None):
         """
         This function runs the entire experiment with all its variations.
         """
@@ -34,7 +34,10 @@ class Experiment:
         self.map_path = map_img_path
         print(f"\nSet Map object currently {self.map_path}.")
 
-        for ex in ExitType:
+        if valid_exits is None:
+            valid_exits = [x for x in ExitType]
+
+        for ex in valid_exits:
             message = f"\nRunning replications for exit type: {ex}" if not visualize else "\nRunning visualization."
             print(f"{message}")
             self.evacuation_times[ex] = self.run_n_replications(n_replications=n_replications, visualize=visualize,
@@ -185,3 +188,48 @@ class Experiment:
     def show_execution_times(self):
 
         print(f'Execution times per replication: {self.execution_times}')
+
+    def save_data_to_pickle(self, folder='./OutputData/', modifier=0):
+
+        evac_times = self.evacuation_times
+        average_evac_times = self.average_evacuation_times
+
+        with open(f'{folder}evac_times_{modifier}.pickle', 'wb') as handle:
+            pickle.dump(evac_times, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+        with open(f'{folder}average_evac_times_{modifier}.pickle', 'wb') as handle:
+            pickle.dump(average_evac_times, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    @staticmethod
+    def load_pickled_data(folder='./OutputData/', modifier='0'):
+
+        with open(f'{folder}evac_times_{modifier}.pickle', 'rb') as handle:
+            evac_times = pickle.load(handle)
+
+        with open(f'{folder}average_evac_times_{modifier}.pickle', 'rb') as handle:
+            average_evac_times = pickle.load(handle)
+
+        return evac_times, average_evac_times
+
+    def combine_results(self, evac1, evac2, evac3, ave1, ave2, ave3):
+        """
+        This function takes the individual dictionaries and overwrites the current experiment's data.
+        Like this, the data visualization methods can be used again after distributed computation.
+        :param evac1:
+        :param evac2:
+        :param evac3:
+        :param ave1:
+        :param ave2:
+        :param ave3:
+        :return:
+        """
+
+        self.evacuation_times = {}
+        self.evacuation_times.update(evac1)
+        self.evacuation_times.update(evac2)
+        self.evacuation_times.update(evac3)
+
+        self.average_evacuation_times = {}
+        self.average_evacuation_times.update(ave1)
+        self.average_evacuation_times.update(ave2)
+        self.average_evacuation_times.update(ave3)
