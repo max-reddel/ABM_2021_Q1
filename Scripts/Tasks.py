@@ -236,7 +236,7 @@ class Walk(BasicTask):
             self.person.move_data.path_to_current_dest = [self.person.move_data.path_to_current_dest[-1]]
 
         # Adjust agent-placement on grid
-        self.person.model.grid.move_agent(agent=self.person, pos=new_pos)
+        self.person.model.grid.move_agent(agent=self.person, pos=(int(new_pos[0]),int(new_pos[1])))
 
     def get_random_destination(self):
         """
