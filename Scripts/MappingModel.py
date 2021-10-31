@@ -36,7 +36,7 @@ def get_border_dims(img_path=current_img_path):
     return im.shape[:-1]
 
 
-class MapModel(Model):
+class EvacuationModel(Model):
     """
     Instantiates Mesa grid and schedule objects.
     Converts pixels on given map image into Mesa grid entities.
@@ -66,7 +66,7 @@ class MapModel(Model):
         self.office_positions = []
         self.helpdesk_positions = []
         self.staff_agents = []
-        self.all_paths = {}     # dict of all paths from office spots to all exits.
+        self.all_paths = {}  # dict of all paths from office spots to all exits.
 
         self.destinations = {Destination.DESK: [],
                              Destination.SHELF: [],
@@ -89,61 +89,33 @@ class MapModel(Model):
             if np.all(im_np[:, :, 3].flatten(order='C') == 255):  # checks if transparencies present in image
                 im_np = np.delete(im_np, 3, 2)
         except:
-            print('MapModel: (minor issue) Transparency check failed, proceeding.')
+            print('EvacuationModel: (minor issue) Transparency check failed, proceeding.')
 
         # convert 2d rgb coords to 1d (even though ndarray is 3d, incl. RGB dimension)
         self.rgbcoords_1d = im_np.reshape((im_np.shape[0] * im_np.shape[1], im_np.shape[2]))
         # retrieve colour palettes in map
-        self.c_unique, c_occurrence = np.unique(self.rgbcoords_1d, return_counts=True, axis=0)
-
-        self.colour_to_grid_object = pd.read_csv(color_path, sep='\t',
-                                                 index_col=2)
-        self.colours = np.array([np.array(literal_eval(self.colour_to_grid_object.loc[colour, 'RGB'])) for colour in
-                                 self.colour_to_grid_object.index])
-        index_map = list(zip(self.colour_to_grid_object.index, self.colours))
-        self.indices = index_map
+        self.colours_all, colours_all_per_occurrence = np.unique(self.rgbcoords_1d, return_counts=True, axis=0)
+        self.colour_to_obj_map = pd.read_csv(color_path, sep='\t',
+                                             index_col=2)
+        self.colours_defined = np.array([np.array(literal_eval(self.colour_to_obj_map.loc[colour, 'RGB'])) for colour in
+                                         self.colour_to_obj_map.index])
+        index_map = list(zip(self.colour_to_obj_map.index, self.colours_defined))  # map object to RGB colours
+        # self.indices = index_map
 
         # check for membership between image and defined colour set, sanity check
         # below: finds the indices where RGB in one array is found in another, returns 2 arrays of indices
-        membership_check = np.where((self.colours == self.c_unique[:, None]).all(-1))
-        if len(membership_check[1]) != len(self.colour_to_grid_object.index):
-            excluded = list(set(list(range(len(self.colour_to_grid_object.index)))) - set(membership_check[1]))
-            excluded_name = [self.colour_to_grid_object.iloc[color,1] for color in excluded]
+        membership_check = np.where((self.colours_defined == self.colours_all[:, None]).all(-1))
+        if len(membership_check[1]) != len(self.colour_to_obj_map.index):
+            excluded = list(set(list(range(len(self.colour_to_obj_map.index)))) - set(membership_check[1]))
+            excluded_name = [self.colour_to_obj_map.iloc[color, 1] for color in excluded]
             raise ValueError(f"Membership check failed: defined colour set item index/indices {excluded_name} "
                              f"not in image")
 
         # detect outlier colours from set exclusion
         # below: finds non-matching colours based on defined set
-        self.outliers = np.where((self.c_unique[:, None] != self.colours).any(-1).all(1))[0]
+        self.outliers = np.where((self.colours_all[:, None] != self.colours_defined).any(-1).all(1))[0]
 
-        # self.correction_map = []    # for diagnostic
-        self.limbo_map = []
-        # find difference vector of outlier colours to main colour.  Minimal difference = closest colour
-        # easy alg: subtract outlier colour from defined set array, sum RGB values, find minimum, match index
-        for idx in self.outliers:
-            in_limbo = False
-            c = self.c_unique[idx, :]
-            c_delta = np.sum(np.abs(np.array(self.colours) - c), axis=1)
-            # additional check: if c_delta higher than condition, default to black
-            if np.amin(c_delta) > 70:
-                parent = (0, 0, 0)
-                in_limbo = True
-            else:
-                parent = self.colours[np.argmin(c_delta, axis=0)]
-
-            # self.correction_map.append((c, parent, np.min(c_delta))) # diagnostic
-
-            # find indices of all pixels with matching colour
-            outlier_pixels = self.find_colour_coords(c)
-            if in_limbo:
-                self.limbo_map.append(
-                    [(c, list(zip(idx % self.gridsize[1], idx // self.gridsize[1]))) for idx in outlier_pixels])
-            # replace outlier colour to main colour
-            for idx in outlier_pixels:
-                self.rgbcoords_1d[idx, :] = parent
-
-        if len(np.unique(self.rgbcoords_1d, axis=0)) != len(self.colours):
-            raise ValueError('RGB correction issue, colours in corrected array not the same as defined set.')
+        self.process_colour_outliers()
 
         # ToyModel-like grid entity populating and visitor spawning
         self.fill_grid(index_map)
@@ -156,13 +128,43 @@ class MapModel(Model):
                                       IA.HelpDeskInteractiveForHelper,
                                       IA.ShelfInteractive]
         self.set_up_exits()
-        # self.batchcompute_all_exits(overwrite=True, test=False) # batchcompute must come after exit setup
-        # self.spawn_visitors(n=self.n_visitors)
-        # self.spawn_staff_and_get_exits_paths(n=self.n_officestaff)
+        self.batchcompute_all_exits(overwrite=False, test=False)  # batchcompute must come after exit setup
+        self.spawn_visitors(n=self.n_visitors)
+        self.spawn_staff_and_get_exits_paths(n=self.n_officestaff)
 
-        # self.batchcompute_closest_exit()
 
         self.datacollector = DataCollector(model_reporters={"safe_agents": self.get_nr_of_safe_agents})
+
+    def process_colour_outliers(self):
+        """
+        Processes colour outliers to their closest relative.
+        Does the following:
+        1. delta1: Gets the difference between outlier colour and the defined colour set
+        2. delta2: Finds the difference between R/G/B of highest diff and of lowest diff.
+            Tells if a shade is darker/lighter.
+        3. if: checks if there's no clear 'closer parent' (especially greys), then look for the smallest sum of delta1 (replacing default delta2)
+        4. parent: encodes change of colour
+        """
+        # self.limbo_check = []
+        for colour in self.outliers:
+            ref_set = self.colours_defined  # for refresh per step, since this is mutable
+            current = self.colours_all[colour, :]
+            delta1 = ref_set - current
+            check1 = np.sum(np.abs(delta1), axis=1)
+            delta2 = np.amax(delta1, axis=1) - np.amin(delta1, axis=1)
+            if np.sum(delta2 < np.amin(delta2) + 10) > 1:
+                select = delta2 < np.amin(delta2 + 10)
+                delta1 = delta1[select, :]
+                ref_set = self.colours_defined[select, :]
+                delta2 = np.sum(np.abs(delta1), axis=1)
+            parent = ref_set[np.argmin(np.abs(delta2))]
+            locations = self.find_colour_coords(current)
+            for loc in locations:
+                self.rgbcoords_1d[loc,:] = parent
+            # self.limbo_check.append((current, parent))
+
+        if len(np.unique(self.rgbcoords_1d, axis=0)) != len(self.colours_defined):
+            raise ValueError('RGB correction issue, colours in corrected array not the same as defined set.')
 
     def is_done(self):
         return len(self.safe_agents) >= self.n_staff + self.n_visitors
@@ -236,12 +238,12 @@ class MapModel(Model):
             x = idxs % self.gridsize[1]
             coords = zip([int(ix) for ix in x], [int(iy) for iy in y])
             # save spawnable items into list
-            if bool(int(self.colour_to_grid_object.loc[obj, 'Spawnable'])):
+            if bool(int(self.colour_to_obj_map.loc[obj, 'Spawnable'])):
                 self.spawnable_positions.extend(coords)
 
             # save destinations to dict as defined in init, used for pathfinding
             try:
-                entity_type = self.colour_to_grid_object.loc[obj, 'Entity_category']
+                entity_type = self.colour_to_obj_map.loc[obj, 'Entity_category']
                 user_destination = None
                 sub_destination = None
                 if 'exit' in entity_type.lower():
@@ -254,7 +256,7 @@ class MapModel(Model):
                         sub_destination = Destination.EXITC
                     elif entity_type == "Exit":
                         # hacky way of catching generic Exit tiles, while still accounting for other exit classes
-                        # print("MapModel: generic Exit object detected, these tiles won't be considered in pathfinding")
+                        # print("EvacuationModel: generic Exit object detected, these tiles won't be considered in pathfinding")
                         user_destination = None
                     else:
                         raise ValueError("Exit Does not exist")
@@ -290,22 +292,10 @@ class MapModel(Model):
                     # below: use Entity_category string from object_colours.tsv to match
                     # with the classes from inanimate agents (hence alias IA)
                     # parentheses after: initiate the matched inanimate class with its associated args
-                    if self.colour_to_grid_object.loc[obj, 'Entity_category'] not in staff_types:
-                        object = getattr(IA, self.colour_to_grid_object.loc[obj, 'Entity_category'])(self.next_id(),
-                                                                                                     self)
+                    if self.colour_to_obj_map.loc[obj, 'Entity_category'] not in staff_types:
+                        object = getattr(IA, self.colour_to_obj_map.loc[obj, 'Entity_category'])(self.next_id(),
+                                                                                                 self)
                         self.grid.place_agent(object, pos=(x, y))
-                    # else:  # entities from animate class go here (helpdesk staff and office staff)
-                    #     # only insert helpdesk staff for now
-                    #     if self.colour_to_grid_object.loc[obj, 'Entity_category'] == 'Office':
-                    #         self.office_positions.append((x, y))
-                    #     elif self.colour_to_grid_object.loc[obj, 'Entity_category'] == 'HelpDeskInteractiveForHelper':
-                    #         self.helpdesk_positions.append((x,y))
-                    #         agent_class = Staff(self.next_id(), self, female_ratio=self.female_ratio,
-                    #                             adult_ratio=self.adult_ratio)
-                    #         self.grid.place_agent(agent=agent_class, pos=(x, y))
-                    #         self.schedule.add(agent_class)
-                    #         self.staff_agents.append(agent_class)
-                    #         self.n_staff += 1
 
 
                 except TypeError:
@@ -338,35 +328,36 @@ class MapModel(Model):
         :param n: number of staff members
         :return: None
         """
-        positions = random.sample(self.office_positions, k=n)
-        positions.extend(self.helpdesk_positions) # addition of fixed/constant helpdesk locations
+        # introduce sanity check
+        self.encoded_starts = set([a[0] for a in self.all_paths.keys()])
+        outliers = list(self.encoded_starts - (set(self.office_positions + self.helpdesk_positions)))
+        if len(outliers) != 0:
+            print(f"Position(s) detected: {outliers}. Will be ignored.")
+        positions = random.sample(self.encoded_starts, k=n-1)
+        empties = list(set(self.encoded_starts) - set(positions))
+        positions.extend(self.helpdesk_positions)  # addition of fixed/constant helpdesk locations
         valid_exits = self.destinations[Destination.EXIT]
 
         for pos in positions:
             staffpax = Staff(self.next_id(), self, female_ratio=self.female_ratio,
-                              adult_ratio=self.adult_ratio)
+                             adult_ratio=self.adult_ratio)
             self.grid.place_agent(agent=staffpax, pos=pos)
             self.schedule.add(staffpax)
-            self.staff_agents.append(staffpax)
-            routes = [self.all_paths[(pos,dest)] for dest in valid_exits]
-            lengths = [len(route) for route in routes]
-            staffpax.emergency_knowledge.closest_exit = routes[lengths.index(min(lengths))][-1]
+            self.staff_agents.append(staffpax)  # all staff agents in a central list
+            paths_not_found = True
+            while paths_not_found:
+                try:
+                    routes = [self.all_paths[(pos, dest)] for dest in valid_exits]
+                    lengths = [len(route) for route in routes]
+                    staffpax.emergency_knowledge.closest_exit = routes[lengths.index(min(lengths))][-1]
+                    break
+                except KeyError:  # catch times with weird values for spaces
+                    print(f"\tMapModel: {pos} not found in all_paths, recalculating")
+                    pos = random.sample(empties, k=1)
+                    empties.remove(pos)
+
             self.n_staff += 1
-        print(f"MapModel: all {n} Staff entities' destinations encoded.")
-
-
-    def batchcompute_closest_exit(self):
-        """
-        conducts the agent_class.emergency_knowledge.compute_closest_exit() for agent classes in one printed wrapper
-        :return: None
-        """
-        print(f"\t>Pre-calculating exit paths for staff, total count: {self.n_staff}.\n"
-              f"\t>Estimated time per staff: ~1min. Make yourself comfortable")
-        for n, staff in enumerate(self.staff_agents):
-            staff.emergency_knowledge.compute_closest_exit()
-            print(f'\t\t>>progress: {n + 1}/{self.n_staff}')
-        print("\t\t>>All staff agents' exit paths pre-calculated.")
-
+        print(f"EvacuationModel: all {len(positions)} Staff entities' destinations encoded.")
 
     def batchcompute_all_exits(self, overwrite=False, save_name='office_to_exit_paths', test=False):
         """
@@ -377,16 +368,16 @@ class MapModel(Model):
         """
         # check if file exists, if not then run, if overwrite=True, then go
         construct = False
-        if test:    # test overrides all, but doesn't save
+        if test:  # test overrides all, but doesn't save
             construct = True
         else:
             if os.path.isfile(f'{save_name}.pickle'):
                 print("> Paths file available.")
                 if overwrite:
-                    print('> Overwriting Paths file, constructing...' )
+                    print('> Overwriting Paths file, constructing...')
                     construct = True
                 else:
-                    with open(f"{save_name}.pickle",'rb') as read:
+                    with open(f"{save_name}.pickle", 'rb') as read:
                         self.all_paths = pickle.load(read)
                     print(">> Paths file loaded!")
             else:
@@ -402,7 +393,7 @@ class MapModel(Model):
                   "\n> Average time per epoch: <1 min. Make yourself comfortable.")
             for epoch, pos in enumerate(all_sources):
                 start_t = time.time()
-                print(f'\t>> Epoch: {epoch+1}/{len(all_sources)}')
+                print(f'\t>> Epoch: {epoch + 1}/{len(all_sources)}')
                 # iterate through exits
                 for idx, exit in enumerate(all_exits):
                     paths = [a_star_search(self.grid, pos, exit)]
@@ -410,7 +401,7 @@ class MapModel(Model):
                     shortest_path = paths[lengths.index(min(lengths))]
                     self.all_paths[(pos, exit)] = shortest_path
                 self.timer.append(round(time.time() - start_t, 1))
-                if test:    # for diagnostic
+                if test:  # for diagnostic
                     if epoch + 1 == 2:
                         break
 
@@ -418,6 +409,6 @@ class MapModel(Model):
             with open(f'{save_name}.pickle', 'wb') as handle:
                 pickle.dump(self.all_paths, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-# test = MapModel()
+# test = EvacuationModel()
 # if __name__ ==  "__main__ ":
-#     test_item = MapModel()
+#     test_item = EvacuationModel()

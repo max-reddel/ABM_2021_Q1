@@ -1,7 +1,5 @@
 RGB	Color_Label	Obj_Label	ID_category	Entity_category	Spawnable
 (0,0,0)	black	wall	0	Wall	0
-(33,58,143)	blue	floor_stairs	0	Obstacle	0
-(39,167,55)	green	toilet	0	""	1
 (44,182,182)	turquoise	door	0	""	0
 (103,184,114)	olive	OOB	0	OutOfBounds	0
 (141,136,193)	lilac	exit_west	0	ExitB	0
