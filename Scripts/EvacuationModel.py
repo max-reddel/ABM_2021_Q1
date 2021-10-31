@@ -181,13 +181,13 @@ class EvacuationModel(Model):
         self.end_time += 1
         self.schedule.step()
         self.datacollector.collect(self)
-        if self.end_time >= 0:
-            if self.end_time % 50 == 0:
-                print(f"Current epoch: {self.end_time}")
-        else:
-            if self.step_start:
-                print(f"Init done, simulation start")
-                self.step_start = False
+        # if self.end_time >= 0:
+            # if self.end_time % 50 == 0:
+            #     print(f"Current epoch: {self.end_time} ")
+        # else:
+        if self.step_start:
+            print(f"Init done, simulation start")
+            self.step_start = False
 
     def set_up_exits(self):
 
@@ -358,7 +358,7 @@ class EvacuationModel(Model):
                     empties.remove(pos)
 
             self.n_staff += 1
-        print(f"EvacuationModel: all {len(positions)} Staff entities' destinations encoded.")
+        # print(f"EvacuationModel: all {len(positions)} Staff entities' destinations encoded.")
 
     def batchcompute_all_exits(self, overwrite=False, save_name='office_to_exit_paths', test=False):
         """
@@ -380,7 +380,7 @@ class EvacuationModel(Model):
                 else:
                     with open(f"{save_name}.pickle", 'rb') as read:
                         self.all_paths = pickle.load(read)
-                    print("EvacuationModel: all_paths loaded from pickle.")
+                    # print("EvacuationModel: all_paths loaded from pickle.")
             else:
                 print("> Paths file not found. Constructing paths file...")
                 construct = True
