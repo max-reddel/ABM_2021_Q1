@@ -50,7 +50,7 @@ class ToyModel(Model):
         self.set_up_exits()
 
         self.not_spawnable_objects = [Wall, Obstacle, Desk, OutOfBounds, Exit, HelpDesk, Shelf, DeskInteractive,
-                                      HelpDeskInteractiveForHelpee, HelpDeskInteractiveForHelper, ShelfInteractive]
+                                      HelpdeskInteractiveForHelpee, HelpdeskInteractiveForHelper, ShelfInteractive]
         self.spawn_visitors(n=self.n_visitors)
         self.spawn_staff()
 
@@ -239,16 +239,16 @@ class ToyModel(Model):
 
         # HelpDesk interactive
         pos = (8, 8)
-        self.grid.place_agent(agent=HelpDeskInteractiveForHelpee(self.next_id(), self), pos=pos)
+        self.grid.place_agent(agent=HelpdeskInteractiveForHelpee(self.next_id(), self), pos=pos)
         self.destinations[Destination.HELPDESK].append(pos)
 
         pos = (3, 13)
-        self.grid.place_agent(agent=HelpDeskInteractiveForHelpee(self.next_id(), self), pos=pos)
+        self.grid.place_agent(agent=HelpdeskInteractiveForHelpee(self.next_id(), self), pos=pos)
         self.destinations[Destination.HELPDESK].append(pos)
 
         # HelpDesk Helper interactive
         pos = (3, 13)
-        self.grid.place_agent(agent=HelpDeskInteractiveForHelper(self.next_id(), self), pos=pos)
+        self.grid.place_agent(agent=HelpdeskInteractiveForHelper(self.next_id(), self), pos=pos)
 
         # Place some staff members
         # One that is in the office
@@ -317,7 +317,7 @@ class ToyModel(Model):
                 if len(n_list) > 0:
 
                     for n in n_list:
-                        if isinstance(n, Office) or isinstance(n, HelpDeskInteractiveForHelper):
+                        if isinstance(n, Office) or isinstance(n, HelpdeskInteractiveForHelper):
                             staff = Staff(self.next_id(), self, female_ratio=self.female_ratio, adult_ratio=self.adult_ratio)
                             self.grid.place_agent(agent=staff, pos=(i, j))
                             self.schedule.add(staff)

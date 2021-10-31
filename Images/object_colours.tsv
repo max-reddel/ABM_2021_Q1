@@ -12,6 +12,6 @@ RGB	Color_Label	Obj_Label	ID_category	Entity_category	Spawnable
 (0,255,255)	cyan	ShelfInteractive	0	ShelfInteractive	0
 (0,0,255)	deepBlue	Shelf	0	Shelf	0
 (255,129,0)	orange	OfficeSpot	0	Office	0
-(255,0,255)	magenta	HelpDeskInteractiveHelper	0	HelpDeskHelper	0
-(160,0,255)	deepPurple	HelpDeskInteractiveHelpee	0	HelpDeskHelpee	0
+(255,0,255)	magenta	HelpDeskInteractiveHelper	0	HelpdeskInteractiveForHelper	0
+(160,0,255)	deepPurple	HelpDeskInteractiveHelpee	0	HelpdeskInteractiveForHelpee	0
 (255,0,0)	red	ExitA	0	ExitA	0

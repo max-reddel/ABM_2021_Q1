@@ -24,7 +24,7 @@ class Experiment:
         self.average_evacuation_times = {ExitType.A: 0, ExitType.B: 0, ExitType.C: 0, ExitType.AB: 0,
                                          ExitType.BC: 0, ExitType.AC: 0, ExitType.ABC: 0}
 
-    def run(self, model, n_replications=10, visualize=False, max_run_length=1000, n_visitors=10, female_ratio=0.5,
+    def run(self, model, n_replications=10, visualize=False, max_run_length=1000, n_visitors=50, n_officestaff=10, female_ratio=0.5,
             adult_ratio=0.5, familiarity=0.1, map_img_path=None, valid_exits=None):
         """
         This function runs the entire experiment with all its variations.
@@ -42,6 +42,7 @@ class Experiment:
             print(f"{message}")
             self.evacuation_times[ex] = self.run_n_replications(n_replications=n_replications, visualize=visualize,
                                                                 max_run_length=max_run_length, n_visitors=n_visitors,
+                                                                n_officestaff=n_officestaff,
                                                                 female_ratio=female_ratio, adult_ratio=adult_ratio,
                                                                 familiarity=familiarity, valid_exits=ex)
 
@@ -53,7 +54,8 @@ class Experiment:
         run_time = round(time.time() - self.start_time, 2)
         print(f'Run time: {run_time} seconds')
 
-    def run_n_replications(self, n_replications=10, visualize=False, max_run_length=1000, n_visitors=10, female_ratio=0.5,
+    def run_n_replications(self, n_replications=10, visualize=False, max_run_length=1000, n_visitors=10,
+                           n_officestaff=10,female_ratio=0.5,
                            adult_ratio=0.5, familiarity=0.1, valid_exits=ExitType.ABC):
 
         """
@@ -74,6 +76,7 @@ class Experiment:
         for i in range(n_replications):
 
             evac_time = self.run_one_replication(visualize=visualize, max_run_length=max_run_length, n_visitors=n_visitors,
+                                                 n_officestaff=n_officestaff,
                                                  female_ratio=female_ratio, adult_ratio=adult_ratio, familiarity=familiarity,
                                                  valid_exits=valid_exits, model=self.model, map_img_path=self.map_path)
 
@@ -84,7 +87,7 @@ class Experiment:
 
         return total_evacuation_times_per_replication
 
-    def run_one_replication(self, visualize=False, max_run_length=1000, n_visitors=10, female_ratio=0.5, adult_ratio=0.5,
+    def run_one_replication(self, visualize=False, max_run_length=1000, n_officestaff=10, n_visitors=10, female_ratio=0.5, adult_ratio=0.5,
                             familiarity=0.1, valid_exits=ExitType.ABC, model=ToyModel, map_img_path=None):
         """
         Runs one simulation, either with a visualization or without. It returns the evacuation time for this run.
@@ -110,7 +113,7 @@ class Experiment:
             # model = MapModel(n_visitors=n_visitors,  female_ratio=female_ratio, adult_ratio=adult_ratio,
             #                  familiarity=familiarity, valid_exits=valid_exits)
             model = model(n_visitors=n_visitors, female_ratio=female_ratio, adult_ratio=adult_ratio,
-                             familiarity=familiarity, valid_exits=valid_exits)
+                             familiarity=familiarity,n_officestaff=n_officestaff, valid_exits=valid_exits)
 
             # Run model
             for i in range(max_run_length):

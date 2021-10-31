@@ -3,7 +3,7 @@ from mesa.visualization.ModularVisualization import ModularServer
 # from Scripts.ToyModel import *    # TODO S: temporary switch off
 from Scripts.AnimateAgents import *
 from Scripts.InanimateAgents import *
-from Scripts.MappingModel import get_border_dims
+from Scripts.EvacuationModel import get_border_dims
 
 def show_visualization(model, img_map_path):
     """

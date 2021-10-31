@@ -31,13 +31,13 @@ class HelpDesk(Item):
         super().__init__(unique_id, model)
 
 
-class HelpDeskInteractiveForHelper(Item):
+class HelpdeskInteractiveForHelper(Item):
 
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
 
 
-class HelpDeskInteractiveForHelpee(Item):
+class HelpdeskInteractiveForHelpee(Item):
 
     def __init__(self, unique_id, model):
         super().__init__(unique_id, model)
