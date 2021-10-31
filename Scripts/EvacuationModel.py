@@ -67,6 +67,7 @@ class EvacuationModel(Model):
         self.helpdesk_positions = []
         self.staff_agents = []
         self.all_paths = {}  # dict of all paths from office spots to all exits.
+        self.step_start = True
 
         self.destinations = {Destination.DESK: [],
                              Destination.SHELF: [],
@@ -183,7 +184,10 @@ class EvacuationModel(Model):
         if self.end_time >= 0:
             if self.end_time % 50 == 0:
                 print(f"Current epoch: {self.end_time}")
-        else: print(f"Current epoch: {self.end_time}")
+        else:
+            if self.step_start:
+                print(f"Init done, simulation start")
+                self.step_start = False
 
     def set_up_exits(self):
 

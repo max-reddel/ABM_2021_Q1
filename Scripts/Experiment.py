@@ -1,5 +1,5 @@
 from Scripts.Visualization import *
-from Scripts.ToyModel import *
+from Scripts.EvacuationModel import *
 from Scripts.Enums import *
 import seaborn as sns
 import pandas as pd
@@ -88,7 +88,7 @@ class Experiment:
         return total_evacuation_times_per_replication
 
     def run_one_replication(self, visualize=False, max_run_length=1000, n_officestaff=10, n_visitors=10, female_ratio=0.5, adult_ratio=0.5,
-                            familiarity=0.1, valid_exits=ExitType.ABC, model=ToyModel, map_img_path=None):
+                            familiarity=0.1, valid_exits=ExitType.ABC, model=EvacuationModel, map_img_path=None):
         """
         Runs one simulation, either with a visualization or without. It returns the evacuation time for this run.
         :param map_img_path:
