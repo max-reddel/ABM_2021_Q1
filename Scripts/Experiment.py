@@ -230,25 +230,27 @@ class Experiment:
 
         return evac_times, average_evac_times
 
-    def combine_results(self, evac1, evac2, evac3, ave1, ave2, ave3):
+    def combine_results(self, to_include):
         """
         This function takes the individual dictionaries and overwrites the current experiment's data.
         Like this, the data visualization methods can be used again after distributed computation.
-        :param evac1:
-        :param evac2:
-        :param evac3:
-        :param ave1:
-        :param ave2:
-        :param ave3:
-        :return:
+        :param to_include: list of all evac time run objects
         """
 
-        self.evacuation_times = {}
-        self.evacuation_times.update(evac1)
-        self.evacuation_times.update(evac2)
-        self.evacuation_times.update(evac3)
+        def safe_overwrite(items_to_merge):
+            target = {}
+            for d in items_to_merge:
+                intersect = list(set(d.keys())& set(target.keys()))
+                for k,v in d.items():
+                    if len(v)>0:
+                        if k in intersect:
+                            target[k] = target[k]+v
+                        else:
+                            target[k] = v
+            return target
+
+        self.evacuation_times = safe_overwrite(to_include)
 
         self.average_evacuation_times = {}
-        self.average_evacuation_times.update(ave1)
-        self.average_evacuation_times.update(ave2)
-        self.average_evacuation_times.update(ave3)
+        for k,v in self.evacuation_times.items():
+            self.average_evacuation_times[k] = sum(v) / len(v)

@@ -6,16 +6,21 @@ This project was conducted by Max Reddel, Felicitas Reddel, and Sherman Lee.
 
 ## Structure
 
-There three main folders: Images, Notebooks, and Scripts.
+There are 4 main folders: Images, Notebooks, OutputData, and Scripts.
 
-The Scripts folder contains all python scripts that are necessary to create the model, the experiment, and the animations.
+In Notebooks are two core notebooks, Main.ipynb to run the experiments (animated or not), and Output_Visualisation for data merging and plotting.
 
-The Main.ipynb in Notebooks can be run to run the experiment, receive all plots, data, and to run the animation.
+The Scripts folder contains all Python scripts that are necessary to create the model, the experiment, and the animations.
 
-## How to run a simulation 
+The OutputData folder contains saved pickle files of simulation outputs from Main.ipynb, and are used for Output_Visualisation.
 
-In the Notebooks folder, there is a Main.ipynb file. If you execute the code below "Run an animation", a visualization will be executed, and you can see the simulation in your browswer.
+The Images folder contains the relevant images that are converted to the map which the agents would navigate through.
 
 ## How to run an experiment 
 
-In the Notebooks folder, there is a Main.ipynb file. If you execute the code below "Run experiments", the experiment will be executed. The relevant parameters are visible and can be changed by the user.
+In the Notebooks folder, in Main.ipynb is the code for the experiment runs. The first section, "Run Experiments" contains the code to run the experiments without animation (due to computational cost), and the next section contains code to run an experiment with animation.
+### How to run a simulation 
+In the Main.ipynb file, execute the code under "Run an animation", a visualization will be executed, and the animation is projected in an internet browser tab. Take note that initialising the animation takes about 10 minutes per se.
+
+## How to view experiment outputs
+In the Notebooks folder, in Output_Visualisation.ipynb is the code for visualising the outputs as numbers and graphs. The first section contains data-merging processes to merge multiple run results into one dataset, and the second shows a series of numeric and graphical outputs specifically for evacuation time per replication and average evacuation time per exit type. 
