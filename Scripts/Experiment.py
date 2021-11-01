@@ -198,7 +198,7 @@ class Experiment:
         :param folder:
         :param modifier:    modifier=1 --> exit types A, B, C
                             modifier=2 --> exit types AB, BC
-                            modifier=2 --> exit types AC, ABC
+                            modifier=3 --> exit types AC, ABC
         """
 
         evac_times = self.evacuation_times
@@ -217,7 +217,7 @@ class Experiment:
         :param folder:
         :param modifier:    modifier=1 --> exit types A, B, C
                             modifier=2 --> exit types AB, BC
-                            modifier=2 --> exit types AC, ABC
+                            modifier=3 --> exit types AC, ABC
         :return evac_times: dictionary
                 average_evac_times: dictionary
         """
