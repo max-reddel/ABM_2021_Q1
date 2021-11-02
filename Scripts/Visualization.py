@@ -5,7 +5,8 @@ from Scripts.AnimateAgents import *
 from Scripts.InanimateAgents import *
 from Scripts.EvacuationModel import get_border_dims
 
-def show_visualization(model, img_map_path):
+def show_visualization(model, img_map_path, n_visitors, female_ratio, adult_ratio,
+                       familiarity, n_officestaff, valid_exits):
     """
     Creates an animation, given a model type (e.g. EvacuationModel)
     """
@@ -27,7 +28,7 @@ def show_visualization(model, img_map_path):
 
         if isinstance(agent, Desk):
             portrayal["Shape"] = "rect"
-            portrayal["Color"] = "brown"
+            portrayal["Color"] = "Black"
             portrayal["h"] = 1
             portrayal["w"] = 1
             portrayal["Name"] = 'desk'
@@ -55,29 +56,29 @@ def show_visualization(model, img_map_path):
 
         if isinstance(agent, ExitA) or isinstance(agent, ExitB) or isinstance(agent, ExitC):
             portrayal["Shape"] = "rect"
-            portrayal["Color"] = "black"
+            portrayal["Color"] = "red"
             portrayal["h"] = 1
             portrayal["w"] = 1
             portrayal["Name"] = 'exit'
 
         if isinstance(agent, Visitor):
             portrayal["Shape"] = "circle"
-            portrayal["Color"] = "blue"
-            portrayal["r"] = 2
-            portrayal["Layer"] = 0
+            portrayal["Color"] = "red"
+            portrayal["r"] = 15
+            portrayal["Layer"] = 2
             portrayal["Name"] = 'visitor'
 
         if isinstance(agent, Staff):
             portrayal["Shape"] = "circle"
             portrayal["Color"] = "green"
-            portrayal["r"] = 2
-            portrayal["Layer"] = 0
+            portrayal["r"] = 15
+            portrayal["Layer"] = 2
             portrayal["Name"] = 'staff'
 
         if isinstance(agent, Alarm):
             portrayal["Shape"] = "circle"
             portrayal["Color"] = "blue"
-            portrayal["r"] = 4
+            portrayal["r"] = 30
             portrayal["Layer"]: 0
             portrayal["Name"] = 'alarm'
             if agent.is_activated and agent.model.schedule.time % 2 == 0:
@@ -94,12 +95,14 @@ def show_visualization(model, img_map_path):
 
     if img_map_path is not None:
         height, width = get_border_dims(img_map_path)
-        px_rep = 2
-        canvas = CanvasGrid(agent_portrayal, width, height, width*px_rep, height*px_rep)
+        px_rep = 3
+        canvas = CanvasGrid(agent_portrayal, width, height, int(round(width*px_rep,0)), int(round(height*px_rep,0)))
         server = ModularServer(model,
                                [canvas, chart],
                                "Evacuation Model",
-                               {"img_path": img_map_path})
+                               {"img_path": img_map_path,"familiarity":familiarity, "n_officestaff":n_officestaff,
+                                "n_visitors":n_visitors, "valid_exits":valid_exits, "female_ratio": female_ratio,
+                                "adult_ratio":adult_ratio})
     else:
         width = 20
         height = 15

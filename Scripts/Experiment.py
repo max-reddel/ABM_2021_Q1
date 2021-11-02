@@ -105,7 +105,8 @@ class Experiment:
 
         if visualize:
             # show_visualization(MapModel)
-            show_visualization(model, map_img_path)
+            show_visualization(model,img_map_path=map_img_path, female_ratio=female_ratio, n_visitors=n_visitors,adult_ratio=adult_ratio, familiarity=familiarity, n_officestaff=n_officestaff,
+                               valid_exits=valid_exits)
 
         else:
 
