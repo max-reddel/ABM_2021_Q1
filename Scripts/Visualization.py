@@ -38,24 +38,24 @@ def show_visualization(model, img_map_path):
         #     portrayal["h"] = 1
         #     portrayal["w"] = 1
         #     portrayal["Name"] = 'chair'
-        #
-        # if isinstance(agent, ShelfInteractive):
-        #     portrayal["Shape"] = "rect"
-        #     portrayal["Color"] = "green"
-        #     portrayal["h"] = 1
-        #     portrayal["w"] = 1
-        #     portrayal["Name"] = 'shelf'
-        #
-        # if isinstance(agent, HelpDeskInteractiveForHelpee):
-        #     portrayal["Shape"] = "rect"
-        #     portrayal["Color"] = "purple"
-        #     portrayal["h"] = 1
-        #     portrayal["w"] = 1
-        #     portrayal["Name"] = 'help desk'
+
+        if isinstance(agent, Shelf):
+            portrayal["Shape"] = "rect"
+            portrayal["Color"] = "green"
+            portrayal["h"] = 1
+            portrayal["w"] = 1
+            portrayal["Name"] = 'shelf'
+
+        if isinstance(agent, HelpDesk):
+            portrayal["Shape"] = "rect"
+            portrayal["Color"] = "purple"
+            portrayal["h"] = 1
+            portrayal["w"] = 1
+            portrayal["Name"] = 'Helpdesk'
 
         if isinstance(agent, ExitA) or isinstance(agent, ExitB) or isinstance(agent, ExitC):
             portrayal["Shape"] = "rect"
-            portrayal["Color"] = "red"
+            portrayal["Color"] = "black"
             portrayal["h"] = 1
             portrayal["w"] = 1
             portrayal["Name"] = 'exit'
@@ -63,21 +63,21 @@ def show_visualization(model, img_map_path):
         if isinstance(agent, Visitor):
             portrayal["Shape"] = "circle"
             portrayal["Color"] = "blue"
-            portrayal["r"] = 0.8
+            portrayal["r"] = 2
             portrayal["Layer"] = 0
             portrayal["Name"] = 'visitor'
 
         if isinstance(agent, Staff):
             portrayal["Shape"] = "circle"
             portrayal["Color"] = "green"
-            portrayal["r"] = 0.8
+            portrayal["r"] = 2
             portrayal["Layer"] = 0
             portrayal["Name"] = 'staff'
 
         if isinstance(agent, Alarm):
             portrayal["Shape"] = "circle"
             portrayal["Color"] = "blue"
-            portrayal["r"] = 1.5
+            portrayal["r"] = 4
             portrayal["Layer"]: 0
             portrayal["Name"] = 'alarm'
             if agent.is_activated and agent.model.schedule.time % 2 == 0:
