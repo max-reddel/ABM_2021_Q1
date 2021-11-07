@@ -12,7 +12,7 @@ In Notebooks are three core notebooks, Main.ipynb to run the experiments without
 
 The Scripts folder contains all Python scripts that are necessary to create the model, the experiment, and the animations.
 
-The OutputData folder contains saved pickle files of simulation outputs from Main.ipynb, and are used for Output_Visualisation.
+The OutputData folder contains saved pickle files of simulation outputs from Main.ipynb, and are used for Output_Visualisation. Additionally, a timelapse video of Exit C is provided within this folder
 
 The Images folder contains the relevant images that are converted to the map which the agents would navigate through.
 

@@ -319,6 +319,8 @@ class EvacuationModel(Model):
             self.grid.place_agent(agent=visitor, pos=pos)
             self.schedule.add(visitor)
 
+
+
     def spawn_staff_and_get_exits_paths(self, n=3):
         """
         Does the following:
